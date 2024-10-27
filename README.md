@@ -1,6 +1,10 @@
 # beste.schule development enviroment using devenv
 
-## How to use
+## Usage
+
+`devenv shell` (or automatically with direnv)
+
+## Installation
 
 1. install [devenv](https://devenv.sh)
 
@@ -18,3 +22,4 @@ rm without-readme.zip
 
     use devenv
   ```
+
