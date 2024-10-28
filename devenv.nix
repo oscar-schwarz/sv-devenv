@@ -234,7 +234,7 @@ in {
 
     # --- Show a welcome message
     echo -e '
-    # Welcome to the beste.schule developer shell arstart
+    # Welcome to the beste.schule developer shell
 
     **Available commands:**
     - `devenv up` - starts all necessary services
