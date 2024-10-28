@@ -195,12 +195,12 @@ in {
         Download the latest version of the beste.schule devenv environment from GitHub.
       '';
       exec = ''
-        # Fetch all three files
-        curl https://github.com/oscar-schwarz/devenv-beste-schule/raw/refs/heads/main/devenv.lock \
+        # Fetch all three filesde
+        curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.lock \
           > devenv.lock
-        curl https://github.com/oscar-schwarz/devenv-beste-schule/raw/refs/heads/main/devenv.nix \
+        curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.nix \
           > devenv.nix
-        curl https://github.com/oscar-schwarz/devenv-beste-schule/raw/refs/heads/main/devenv.yaml \
+        curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.yaml \
           > devenv.yaml
       '';
     };
