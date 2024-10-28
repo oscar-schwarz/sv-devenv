@@ -8,10 +8,9 @@ let
   APP_NAME = "lokale-beste-schule";
   APP_DEBUG = "true";
   APP_ENV = "local";
+  VITE_APP_ENV = APP_ENV;
   APP_URL = "http://${SERVER_HOST}:${SERVER_PORT}";
   APP_KEY = "base64:Igl3VDbdMSWnCDABL7k9ioK8hJ1EKgM25kh6vnxUntQ="; # This has to be set
-
-  VITE_APP_ENV = "debug";
 
   TOKEN_VALID = "14";
   TOKEN_LENGTH = "16";
@@ -41,6 +40,19 @@ let
   REPORT_BYPASS_CACHE = "false";
 
   QUEUE_CONNECTION = "database";
+
+  # Mailpit
+  MAIL_MAILER = "smtp";
+  MAIL_HOST = SERVER_HOST;
+  MAIL_UI_PORT = "18025";
+  MAIL_PORT = "11025";
+  MAIL_USERNAME= "null";
+  MAIL_PASSWORD= "null";
+  MAIL_ENCRYPTION= "null";
+  MAIL_FROM_ADDRESS= "noreply@schulverwalter.de";
+  MAIL_FROM_NAME = "Schulverwalter";
+
+  # Custom for this nix file
   XDEBUG_PORT = "19003";
   VITE_PORT = "15734";
 };
@@ -83,41 +95,52 @@ in {
   # Configure Node
   languages.javascript = {
     enable = true;
+    package = pkgs.nodejs_18;
     npm.enable = true;
   };
 
 
   # --- ALL PROCESSES STARTED WITH `devenv up`
-  # Database
-  services.mysql = {
-    enable = true;
-    package = pkgs.mariadb;
-    ensureUsers = [
-      {
-        name = config.env.DB_USERNAME;
-        password = config.env.DB_PASSWORD;
-        ensurePermissions = {
-          "*.*" = "ALL PRIVILEGES";
+  process.manager.implementation = "overmind"; # for some reason, npm wont shut down with process-compose
+  services = {
+    # Database
+    mysql = {
+      enable = true;
+      package = pkgs.mariadb;
+      ensureUsers = [
+        {
+          name = config.env.DB_USERNAME;
+          password = config.env.DB_PASSWORD;
+          ensurePermissions = {
+            "*.*" = "ALL PRIVILEGES";
+          };
+        }
+      ];
+      initialDatabases = [
+        {
+          name = config.env.DB_DATABASE;
+        }
+      ];
+      settings = {
+        mysqld = {
+          port = config.env.DB_PORT;
+          bind-address = config.env.DB_HOST;
         };
-      }
-    ];
-    initialDatabases = [
-      {
-        name = config.env.DB_DATABASE;
-      }
-    ];
-    settings = {
-      mysqld = {
-        port = config.env.DB_PORT;
-        bind-address = config.env.DB_HOST;
       };
+    };
+
+    # Email testing
+    mailpit = {
+      enable = true;
+      smtpListenAddress = "${config.env.MAIL_HOST}:${config.env.MAIL_PORT}";
+      uiListenAddress = "${config.env.MAIL_HOST}:${config.env.MAIL_UI_PORT}";
     };
   };
 
   # custom processes
   processes = {
-    artisan.exec = "php artisan serve";
-    vite.exec = "npm run dev -- --port ${config.env.VITE_PORT}";
+    laravel.exec = "php artisan serve";
+    vite.exec = "npm run dev -- --port ${config.env.VITE_PORT} --debug";
   };
 
 
@@ -166,6 +189,21 @@ in {
           "$@"
       '';
     };
+
+    devshell-fetch = {
+      description = ''
+        Download the latest version of the beste.schule devenv environment from GitHub.
+      '';
+      exec = ''
+        # Fetch all three files
+        curl https://github.com/oscar-schwarz/devenv-beste-schule/raw/refs/heads/main/devenv.lock \
+          > devenv.lock
+        curl https://github.com/oscar-schwarz/devenv-beste-schule/raw/refs/heads/main/devenv.nix \
+          > devenv.nix
+        curl https://github.com/oscar-schwarz/devenv-beste-schule/raw/refs/heads/main/devenv.yaml \
+          > devenv.yaml
+      '';
+    };
   };
 
 
@@ -200,7 +238,7 @@ in {
 
     **Available commands:**
     - `devenv up` - starts all necessary services
-    ${descriptionsOf ["beste-schule-install" "sql"]}
+    ${descriptionsOf ["beste-schule-install" "sql" "devshell-fetch"]}
     '\
     | glow
   '';
@@ -208,8 +246,8 @@ in {
 
   # --- ADDITIONAL PACKAGES ---
   packages = with pkgs; [
-    # Terminal markdown
-    glow
+    glow # Terminal markdown
+    curl # Fetch stuff
 
     # Waits for a specific port to be openend
     (pkgs.writeShellApplication {
