@@ -195,7 +195,7 @@ in {
         Download the latest version of the beste.schule devenv environment from GitHub.
       '';
       exec = ''
-        # Fetch all three filesde
+        # Fetch all three files
         curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.lock \
           > devenv.lock
         curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.nix \
@@ -234,7 +234,7 @@ in {
 
     # --- Show a welcome message
     echo -e '
-    # Welcome to the beste.schule developer shell
+    # Welcome to the beste.schule developer shell arstart
 
     **Available commands:**
     - `devenv up` - starts all necessary services
