@@ -2,7 +2,7 @@
 
 let 
  dotenvDefaults = rec {
-  SERVER_HOST = "localhost";
+  SERVER_HOST = "127.0.0.1";
   SERVER_PORT = "18000";
 
   APP_NAME = "lokale-beste-schule";
@@ -50,6 +50,8 @@ let
   MAIL_PASSWORD= "null";
   MAIL_ENCRYPTION= "null";
   MAIL_FROM_ADDRESS= "noreply@schulverwalter.de";
+  MAIL_SUPPORT = "support@schulverwalter.test";
+  MAIL_SALES = "vertrieb@schulverwalter.test";
   MAIL_FROM_NAME = "Schulverwalter";
 
   # Custom for this nix file
