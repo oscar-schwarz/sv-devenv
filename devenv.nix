@@ -28,7 +28,7 @@ let
 
   DB_CONNECTION = "mysql";
   DB_HOST = "127.0.0.1";
-  DB_PORT = "16003";
+  DB_PORT = "13306";
   DB_DATABASE = "beste_schule";
   DB_USERNAME = "user";
   DB_PASSWORD = "user";
@@ -170,7 +170,7 @@ in {
         php artisan migrate
 
         # --- Seed the database (Only if a seeder exists)
-        if [ -e "database/seeders/DatabaseSeeder.php" ]; then
+        if [ -f "database/seeders/SchoolSeeder.php" ]; then
           php artisan db:seed
         fi
 
