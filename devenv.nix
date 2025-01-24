@@ -142,7 +142,8 @@ in {
   # custom processes
   processes = {
     laravel.exec = "php artisan serve";
-    vite.exec = "npm run dev -- --port ${config.env.VITE_PORT} --debug";
+    laravel-worker.exec = "php artisan queue:work";
+    vite.exec = "npm run dev -- --port ${config.env.VITE_PORT}";
   };
 
 
