@@ -1,15 +1,15 @@
 { pkgs, lib, config, ... }:
 
 let 
- dotenvDefaults = rec {
+ dotenvDefaults = {
   SERVER_HOST = "127.0.0.1";
   SERVER_PORT = "18000";
 
   APP_NAME = "lokale-beste-schule";
   APP_DEBUG = "true";
   APP_ENV = "local";
-  VITE_APP_ENV = APP_ENV;
-  APP_URL = "http://${SERVER_HOST}:${SERVER_PORT}";
+  VITE_APP_ENV = config.env.APP_ENV;
+  APP_URL = "http://${config.env.SERVER_HOST}:${config.env.SERVER_PORT}";
   APP_KEY = "base64:Igl3VDbdMSWnCDABL7k9ioK8hJ1EKgM25kh6vnxUntQ="; # This has to be set
 
   TOKEN_VALID = "14";
@@ -43,7 +43,7 @@ let
 
   # Mailpit
   MAIL_MAILER = "smtp";
-  MAIL_HOST = SERVER_HOST;
+  MAIL_HOST = config.env.SERVER_HOST;
   MAIL_UI_PORT = "18025";
   MAIL_PORT = "11025";
   MAIL_USERNAME= "null";
