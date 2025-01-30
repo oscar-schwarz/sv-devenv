@@ -253,11 +253,15 @@ in {
   '';
 
   pre-commit.hooks = {
-    alejandra.enable = true;
     check-added-large-files.enable = true;
     check-merge-conflicts.enable = true;
     shellcheck.enable = true;
     shfmt.enable = true;
+    no-commit-to-branch = {
+      enable = true;
+      settings.branch = [ "main" "master" "production" ];
+      always_run = true;
+    };
     check-types-ts = {
       enable = true;
       name = "check-types-ts";
