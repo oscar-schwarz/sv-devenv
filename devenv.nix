@@ -68,42 +68,42 @@ in {
   env = lib.attrsets.mapAttrs (key: value: lib.mkOptionDefault value) dotenvDefaults;
 
   # --- LANGUAGLES SETUP ---
-  # Configure PHP
-  languages.php = {
-    enable = true;
-    package = pkgs.php.buildEnv {
-      extensions = { enabled, all }: enabled ++ (with all; [
-        xdebug
-        dom
-        curl
-        bcmath
-        pdo
-        tokenizer
-        mbstring
-        mysqli
-      ]);
-      extraConfig = ''
-        max_execution_time = 120
-        memory_limit = 256M
+  languages = {
+    php = {
+      enable = true;
+      package = pkgs.php.buildEnv {
+        extensions = { enabled, all }: enabled ++ (with all; [
+          xdebug
+          dom
+          curl
+          bcmath
+          pdo
+          tokenizer
+          mbstring
+          mysqli
+        ]);
+        extraConfig = ''
+          max_execution_time = 120
+          memory_limit = 256M
 
-        [XDebug]
-        xdebug.mode=debug
-        xdebug.start_with_request=yes
-        xdebug.client_port=${config.env.XDEBUG_PORT}
-      '';
+          [XDebug]
+          xdebug.mode=debug
+          xdebug.start_with_request=yes
+          xdebug.client_port=${config.env.XDEBUG_PORT}
+        '';
+      };
     };
-  };
 
-  # Configure Node
-  languages.javascript = {
-    enable = true;
-    package = pkgs.nodejs_18;
-    npm.enable = true;
-  };
+    javascript = {
+      enable = true;
+      package = pkgs.nodejs_18;
+      npm.enable = true;
+    };
 
+    typescript.enable = true;
+  };
 
   # --- ALL PROCESSES STARTED WITH `devenv up`
-  process.manager.implementation = "overmind"; # for some reason, npm wont shut down with process-compose
   services = {
     # Database
     mysql = {
@@ -246,6 +246,29 @@ in {
     | glow
   '';
 
+  pre-commit.hooks = {
+    alejandra.enable = true;
+    check-added-large-files.enable = true;
+    check-merge-conflicts.enable = true;
+    shellcheck.enable = true;
+    shfmt.enable = true;
+    check-types-ts = {
+      enable = true;
+      name = "check-types-ts";
+      description = "does some validation on types.ts, like type sorting order";
+      files = "^resources/js/types\.ts$";
+      entry = let
+        pkg = pkgs.writeShellApplication {
+          name = "check-types-ts";
+          runtimeInputs = [pkgs.ripgrep pkgs.coreutils];
+          text = ''
+            rg '^export (type|interface) (\w+)' --only-matching --replace '$2' --no-filename "$${@}" | sort --check
+          '';
+        };
+      in
+        lib.getExe pkg;
+    };
+  };
 
   # --- ADDITIONAL PACKAGES ---
   packages = with pkgs; [
