@@ -137,6 +137,12 @@ in {
       smtpListenAddress = "${config.env.MAIL_HOST}:${config.env.MAIL_PORT}";
       uiListenAddress = "${config.env.MAIL_HOST}:${config.env.MAIL_UI_PORT}";
     };
+
+    # Adminer for accessing the database (localhost:8080 by default)
+    adminer = {
+      enable = true;
+      package = pkgs.adminerevo;
+    };
   };
 
   # custom processes
