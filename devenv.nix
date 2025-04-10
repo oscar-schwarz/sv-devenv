@@ -272,7 +272,7 @@ in {
           name = "check-types-ts";
           runtimeInputs = [pkgs.ripgrep pkgs.coreutils];
           text = ''
-            rg '^export (type|interface) (\w+)' --only-matching --replace '$2' --no-filename "$${@}" | sort --check
+            rg '^export (type|interface) (\w+)' --only-matching --replace '$2' --no-filename "$@" | sort --check
           '';
         };
       in
