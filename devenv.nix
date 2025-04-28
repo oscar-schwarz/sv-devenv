@@ -84,7 +84,7 @@ in {
         ]);
         extraConfig = ''
           max_execution_time = 120
-          memory_limit = 256M
+          memory_limit = 1024M
 
           [XDebug]
           xdebug.mode=debug
@@ -163,6 +163,9 @@ in {
         # --- Install dependencies
         composer install
         npm install
+
+        # --- Create the laravel passport
+        php artisan passport:install
         
         # --- Start the sql service
         devenv up mysql --detach
@@ -199,6 +202,33 @@ in {
       '';
     };
 
+    api = {
+      description = ''
+        A script that conveniently calls the API of a local or remote instance.
+      '';
+      exec = lib.pipe
+
+        # repo data 
+        {
+          url = "https://git.tammena.me/megamanmalte/nixos.git";
+          rev = "35e7286caf96881da46f133b9409f52a881cbe65";
+        }
+      
+        [
+          # fetch the repo
+          builtins.fetchGit
+
+          # convert repo set to path to api.nix
+          (fetched: fetched.outPath + "/pkgs/api.nix")
+
+          # call the package
+          (path: (pkgs.callPackage path {}))
+
+          # return the exe path
+          lib.getExe
+        ];
+    };
+
     devshell-fetch = {
       description = ''
         Download the latest version of the beste.schule devenv environment from GitHub.
@@ -218,11 +248,7 @@ in {
 
   # --- SCRIPT ON ENTERING THE DEV SHELL ---
   # Greeting on entering the shell
-  enterShell = let
-    descriptionsOf = lib.lists.foldl (acc: name: acc + ''
-      - `${name}` - ${config.scripts.${name}.description}
-    '') "";
-  in ''
+  enterShell = ''
     # --- Making sure that devenv files are excluded from git history
     excludeGit=".git/info/exclude"
     files=".devenv devenv.nix devenv.yaml devenv.lock .devenv.flake.nix"
@@ -247,7 +273,15 @@ in {
 
     **Available commands:**
     - `devenv up` - starts all necessary services
-    ${descriptionsOf ["beste-schule-install" "sql" "devshell-fetch"]}
+    ${lib.pipe config.scripts [
+      # Only show scripts with a description
+      (lib.attrsets.filterAttrs (_: script: script.description != ""))
+
+      # Format the filtered set to a string showing name and description
+      (lib.foldlAttrs (acc: name: value: acc + ''
+        - `${name}` - ${config.scripts.${name}.description}
+      '') "")
+    ]}
     '\
     | glow
   '';
