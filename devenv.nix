@@ -226,6 +226,9 @@ in {
 
           # return the exe path
           lib.getExe
+
+          # add the arguments passed to the devenv script
+          (exe: exe + " $@")
         ];
     };
 
