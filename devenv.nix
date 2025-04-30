@@ -239,27 +239,27 @@ in {
           | if $in.status == 200 {
               $in.body.data | maybe_apply ($select != null) { select ...$select }
             } else {
-              $in.body | maybe_apply ("trace" in $in) { 
-                update trace { 
+              $in.body | maybe_apply ("trace" in $in) {
+                update trace {
                   # Only include entries where a file is specified and where the file is not in vendor package
                   where {
-                    |row| ("file" in $row) and $row.file !~ "/vendor/"
+                    "file" in $in and $in.file !~ "/vendor/"
                   }
                   # remove the PWD from the path to the file
                   | each {
-                    |row| $row | update file { str replace $"($env.PWD)/" "" }
+                    update file { str replace $"($env.PWD)/" "" | str replace "/var/www/html/" "" }
                   }
                 }
               }
               # same as above for main file of error
-              | maybe_apply ("file" in $in) { update file { str replace $"($env.PWD)/" "" } }
+              | update file { str replace $"($env.PWD)/" "" | str replace "/var/www/html/" "" }
             }
           # remove the debug section from the response if not specified
-          | maybe_apply (not $dbdebug) { reject "debug" }
+          | maybe_apply (not $dbdebug and "debug" in $in) { reject "debug" }
           | maybe_apply $explore { explore }
           | maybe_apply $raw {to json}
         }
-        '';
+      '';
     };
 
     devshell-fetch = {
