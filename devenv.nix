@@ -160,6 +160,8 @@ in {
         Installs all dependencies, creates, migrates and seeds the database.
       '';
       exec = ''
+        #!/usr/bin/env nu
+
         # --- Install dependencies
         composer install
         npm install
@@ -206,30 +208,58 @@ in {
       description = ''
         A script that conveniently calls the API of a local or remote instance.
       '';
-      exec = lib.pipe
-
-        # repo data 
-        {
-          url = "https://git.tammena.me/megamanmalte/nixos.git";
-          rev = "35e7286caf96881da46f133b9409f52a881cbe65";
+      package = pkgs.nushell;
+      binary = "nu";
+      exec = ''
+        # Ensure that the input starts with a slash
+        def ensure_leading_slash [] {
+          if ($in | str starts-with "/") { echo $in } else { echo $"/($in)" }
         }
-      
-        [
-          # fetch the repo
-          builtins.fetchGit
-
-          # convert repo set to path to api.nix
-          (fetched: fetched.outPath + "/pkgs/api.nix")
-
-          # call the package
-          (path: (pkgs.callPackage path {}))
-
-          # return the exe path
-          lib.getExe
-
-          # add the arguments passed to the devenv script
-          (exe: exe + " $@")
-        ];
+        # Apply the given `func` if `ok` is true and just pass the input if not
+        def maybe_apply [ ok: bool func: closure ] {
+          if $ok { do $func $in } else { $in }
+        }
+        # Main function
+        def main [ path: string ...select: cell-path --token (-t): string --explore (-x) --host: string = "http://localhost:8000" --raw (-r) --dbdebug (-d) ] {
+          # Extract token from environment if not passed explicitely
+          let token = if $token != null {
+            echo $token
+          } else if "TOKEN_L2" in $env {
+            echo $env.TOKEN_L2
+          } else {
+            error make { msg: "TOKEN_L2 environment variable is not set. Provide a token with `--token TOKEN`" label: { span: (metadata $token).span, text: "--token TOKEN not provided" }}
+          }
+          # Construct the url
+          let url = $"($host)/api($path | ensure_leading_slash)"
+          # Fetch from the api!
+          http get $url --allow-errors --full --headers [
+              "Accept" "application/json"
+              "Authorization" $"Bearer ($token)"
+            ]
+          | if $in.status == 200 {
+              $in.body.data | maybe_apply ($select != null) { select ...$select }
+            } else {
+              $in.body | maybe_apply ("trace" in $in) { 
+                update trace { 
+                  # Only include entries where a file is specified and where the file is not in vendor package
+                  where {
+                    |row| ("file" in $row) and $row.file !~ "/vendor/"
+                  }
+                  # remove the PWD from the path to the file
+                  | each {
+                    |row| $row | update file { str replace $"($env.PWD)/" "" }
+                  }
+                }
+              }
+              # same as above for main file of error
+              | maybe_apply ("file" in $in) { update file { str replace $"($env.PWD)/" "" } }
+            }
+          # remove the debug section from the response if not specified
+          | maybe_apply (not $dbdebug) { reject "debug" }
+          | maybe_apply $explore { explore }
+          | maybe_apply $raw {to json}
+        }
+        '';
     };
 
     devshell-fetch = {
