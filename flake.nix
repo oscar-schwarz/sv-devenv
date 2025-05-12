@@ -1,30 +1,37 @@
 {
-  description = "A very simple Nix flake that loads `devenv` into path when opening the devshell.";
+  description = "The flake for the beste schule devenv";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    devenv.url = "github:cachix/devenv";
+    nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling";
   };
-  outputs = { nixpkgs, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem
-      (system:
-        let pkgs = nixpkgs.legacyPackages.${system}; in
-        {
-          devShells.default = pkgs.mkShell {
-            buildInputs = with pkgs; [ devenv curl ];
-
-            # Fetch the devenv.nix files if not present in repo
-            shellHook = ''
-              if ! [ -f "devenv.nix" ]; then
-                curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.lock \
-                  > devenv.lock && \
-                curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.nix \
-                  > devenv.nix && \
-                curl https://raw.githubusercontent.com/oscar-schwarz/devenv-beste-schule/refs/heads/main/devenv.yaml \
-                  > devenv.yaml
-              fi
-            '';
-          };
-        }
-      );
+  outputs = { nixpkgs, flake-utils, devenv, ... }: let 
+    pkgs = import nixpkgs {};
+  in rec {
+    devenvModule = { lib, ... }: {
+      imports = lib.filesystem.listFilesRecursive ./modules;
+    };
+    project = pkgs.lib.evalModules {
+      specialArgs = {
+        inherit pkgs;
+        inputs = devenv.inputs;
+      };
+      modules = [
+        devenvModule
+        "${devenv.outPath}/src/modules/top-level.nix"
+      ];
+    };
+  }
+  // ( flake-utils.lib.eachDefaultSystem
+    (system: let 
+      pkgs = import devenv.inputs.nixpkgs {inherit system;};
+    in {
+      devShells.default = pkgs.mkShell {
+        shellHook = ''
+          nix repl --expr "(builtins.getFlake \"$PWD\").outputs.project"
+        '';
+      };
+    })
+  );
 }
