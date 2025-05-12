@@ -1,16 +1,17 @@
 {  pkgs, lib, config, ... }: let
+  inherit (builtins) getAttr;
   inherit (lib) mkIf;
 
   cfg = config.beste-schule;
+  localLib = config.lib.beste-schule;
 
-  isNative = cfg.mode == "native";
-  isContainer = cfg.mode == "container";
 in mkIf cfg.enable {
   languages = {
-    php = {
+
+    php = mkIf localLib.isWeb {
       enable = true;
       # advanced php setup only needed in native mode
-      package = mkIf isNative pkgs.php.buildEnv {
+      package = mkIf localLib.isNative (pkgs.php82.buildEnv {
         extensions = { enabled, all }: enabled ++ (with all; [
           xdebug
           dom
@@ -30,7 +31,7 @@ in mkIf cfg.enable {
           xdebug.start_with_request=yes
           xdebug.client_port=${config.env.XDEBUG_PORT}
         '';
-      };
+      });
     };
 
     javascript = {
