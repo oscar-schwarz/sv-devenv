@@ -14,7 +14,7 @@ in {
       enable = mkEnableOption "docker daemon running as a process. Removes to the need to having a container engine running.";
       ready_log_line = mkOption {
         description = "The docker daemon is considered initialized when the log contains this string.";
-        default = "API listen on";
+        default = "Daemon has completed initialization";
         type = types.str;
       };
       exec = mkOption {
@@ -24,6 +24,7 @@ in {
       };
     };
     enableHMRPatch = mkEnableOption "the patch that fixes Vite HMR in the container";
+    enableXDebugPatch = mkEnableOption "the patch that fixes XDebug inside the container";
   };
  
   config = mkIf cfg.enable {
@@ -53,10 +54,20 @@ in {
     + (if cfg.dockerd.enable then ''
         # --- dockerd needs that to function properly
         export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+        export DOCKERD_ROOTLESS_ROOTLESSKIT_DISABLE_HOST_LOOPBACK=false
     '' else "")
     + (if cfg.enableHMRPatch then ''
-      patch --forward --quiet --input=${../../../diff/hmr-fix.diff}
+      patch --forward -r - < ${../../../diff/hmr-fix.diff}
       git update-index --assume-unchanged vite.config.js
+    '' else "")
+    + (if cfg.enableXDebugPatch then ''
+      phpIni=vendor/laravel/sail/runtimes/8.3/php.ini
+      if ! grep -q "start_with_request=yes" $phpIni; then
+        echo -e "\\n[xdebug]\\nxdebug.start_with_request=yes" >> $phpIni
+        devenv up --detach
+        sail build --quiet
+        devenv processes stop
+      fi
     '' else "");
   };
 }
