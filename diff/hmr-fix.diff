@@ -1,0 +1,15 @@
+diff --git a/vite.config.js b/vite.config.js
+index a894ff454..15512c837 100644
+--- a/vite.config.js
++++ b/vite.config.js
+@@ -18,7 +18,9 @@ export default defineConfig(({ command, mode }) => {
+                     'resources/css/static.css',
+                     'resources/js/static.js',
+                 ],
+-                refresh: true,
++                refresh: [
++                    "resources/**",
++                ],
+             }),
+             vue({
+                 template: {

@@ -8,6 +8,8 @@
   inherit (lib) mkIf;
 
   cfg = config.sv.vite-vue-laravel;
+
+  boolStr = bool: if bool then "true" else "false"; 
 in mkIf cfg.enable {
   scripts = {
     # --- INTERFACES
@@ -40,12 +42,12 @@ in mkIf cfg.enable {
         phpOrSail=${if cfg.sail.enable then "sail" else "php"}
 
         # --- Install dependencies
-        if [ ${!cfg.sail.enable} ]; then
+        if ${boolStr (!cfg.sail.enable)}; then
           composer install
           npm install
         fi
 
-        if [ ${cfg.sail.enable} ]; then
+        if ${boolStr cfg.sail.enable}; then
           # --- Start container
           devenv up --detach
         else
@@ -56,7 +58,7 @@ in mkIf cfg.enable {
           
           # --- Start Laravel
           devenv up artisan --detach
-        if
+        fi
 
         # --- Wait until everything started
         wait-for-port ${config.env.APP_PORT}

@@ -1,5 +1,5 @@
 {
-  description = "The flake for the beste schule devenv";
+  description = "A collection of devenv modules for specific projects.";
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";

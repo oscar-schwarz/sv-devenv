@@ -4,14 +4,14 @@
   config,
   ...
 }: let
-  inherit (builtins) attrNames length concatStringsSep head;
-  inherit (lib) pipe mkDefault mkEnableOption mkIf filterAttrs;
+  inherit (builtins) attrNames length concatStringsSep head typeOf;
+  inherit (lib) pipe mkDefault mkEnableOption mkIf filterAttrs mkOption types;
 
   cfg = config.sv;
   # config.lib
   cfgLib = rec {
     enabledModule = pipe cfg [
-      (filterAttrs (_: value: value.enable))
+      (filterAttrs (_: value: (typeOf value == "set") && (value ? "enable") && value.enable))
       attrNames
       (list: if list == [] then null else (head list))
     ];

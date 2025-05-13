@@ -23,6 +23,7 @@ in {
         type = types.str;
       };
     };
+    enableHMRPatch = mkEnableOption "the patch that fixes Vite HMR in the container";
   };
  
   config = mkIf cfg.enable {
@@ -52,10 +53,10 @@ in {
     + (if cfg.dockerd.enable then ''
         # --- dockerd needs that to function properly
         export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+    '' else "")
+    + (if cfg.enableHMRPatch then ''
+      patch --forward --quiet --input=${../../../diff/hmr-fix.diff}
+      git update-index --assume-unchanged vite.config.js
     '' else "");
-
-    processes = {
-      
-    };
   };
 }
