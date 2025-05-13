@@ -97,7 +97,7 @@
     ];
   };
   app = {
-    all = [  
+    all = [
       "NUXT_PUBLIC_API_BASE"
       "NUXT_PUBLIC_BASE_URL"
       "NUXT_PUBLIC_OAUTH_AUTHORIZATION_URL"

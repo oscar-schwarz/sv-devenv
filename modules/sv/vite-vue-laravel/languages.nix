@@ -1,17 +1,18 @@
-{  pkgs, lib, config, ... }: let
-  inherit (builtins) getAttr;
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: let
   inherit (lib) mkIf;
 
-  cfg = config.beste-schule;
-  localLib = config.lib.beste-schule;
-
+  cfg = config.sv.vite-vue-laravel;
 in mkIf cfg.enable {
   languages = {
-
-    php = mkIf localLib.isWeb {
+    php = {
       enable = true;
-      # advanced php setup only needed in native mode
-      package = mkIf localLib.isNative (pkgs.php82.buildEnv {
+      # advanced php config not needed in sail mode
+      package = mkIf (!cfg.sail.enable) (pkgs.php83.buildEnv {
         extensions = { enabled, all }: enabled ++ (with all; [
           xdebug
           dom
