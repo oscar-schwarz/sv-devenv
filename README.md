@@ -77,3 +77,7 @@ sv.vite-vue-laravel = {
 - **Default**: `false`
 - **Description**: Enables the patch that fixes XDebug inside the container.
 
+#### `sv.vue-ionic.enable`
+- **Type**: boolean
+- **Default**: `false`
+- **Description**: Enables the development environment for a project using Vue with Ionic and Nuxt for bundling it.
