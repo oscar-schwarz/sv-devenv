@@ -35,8 +35,8 @@ To get started with the vite-vue-laravel repository with sail enabled put this i
 
 ```nix
 sv.vite-vue-laravel = {
-    enable = true;
-    sail.enable = true;
+  enable = true;
+  sail.enable = true;
 }
 ```
 

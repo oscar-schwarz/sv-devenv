@@ -1,6 +1,8 @@
 {
+  lib,
+  config,
   ...
-}: {
+}: lib.mkIf config.sv.vite-vue-laravel.enable {
   dotenv.defaults = {
     FORWARD_DB_PORT = "\${DB_PORT}";
     VITE_PORT = "5173";
