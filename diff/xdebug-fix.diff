@@ -1,0 +1,7 @@
+5c5,7
+< pcov.directory = .
+\ No newline at end of file
+---
+> pcov.directory = .
+> [xdebug]
+> start_with_request=yes

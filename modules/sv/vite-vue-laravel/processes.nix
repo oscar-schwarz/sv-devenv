@@ -17,7 +17,7 @@ in mkIf cfg.enable {
       process-compose = {inherit (cfg.sail.dockerd) ready_log_line;};
     };
     sail = {
-      exec = "sail up";
+      exec = "sail build;sail up";
       process-compose = {
         shutdown = {
           command = "sail down";

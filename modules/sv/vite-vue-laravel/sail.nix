@@ -4,8 +4,10 @@
   config,
   ...
 }: let
-  inherit (lib) mkIf mkEnableOption mkOption types;
-  
+  inherit (builtins) concatStringsSep;
+  inherit (lib) mkIf mkEnableOption mkOption types pipe;
+  boolStr = bool: if bool then "true" else "false";
+
   cfg = config.sv.vite-vue-laravel.sail;
 in {
   options.sv.vite-vue-laravel.sail = {
@@ -19,7 +21,7 @@ in {
       };
       exec = mkOption {
         description = "The command to run the daemon.";
-        default = "dockerd-rootless";
+        default = "dockerd-rootless --host $DOCKER_HOST";
         type = types.str;
       };
     };
@@ -40,7 +42,12 @@ in {
       export PATH="$PATH:$DEVENV_ROOT/vendor/bin"
 
       # --- Warning to fix permissions in laravel storage
-      if [[ "$(stat -c "%a" $DEVENV_ROOT)" != "777" ]]; then
+      if [[ ${
+        pipe ["package-lock.json" "package.json" "storage" "node_modules" "vendor"] [
+          (map (file: ''"$(stat -c "%a" ${file})" != 777''))
+          (concatStringsSep " || ")
+        ]
+      } ]]; then
         echo -e '
         ## Warning
         
@@ -53,21 +60,18 @@ in {
     ''
     + (if cfg.dockerd.enable then ''
         # --- dockerd needs that to function properly
-        export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+        export DOCKER_HOST=unix://$DEVENV_STATE/dockerd.sock
         export DOCKERD_ROOTLESS_ROOTLESSKIT_DISABLE_HOST_LOOPBACK=false
     '' else "")
     + (if cfg.enableHMRPatch then ''
+      echo '> Applying Vite HMR Patch...'
       patch --forward -r - < ${../../../diff/hmr-fix.diff}
       git update-index --assume-unchanged vite.config.js
     '' else "")
     + (if cfg.enableXDebugPatch then ''
-      phpIni=vendor/laravel/sail/runtimes/8.3/php.ini
-      if ! grep -q "start_with_request=yes" $phpIni; then
-        echo -e "\\n[xdebug]\\nxdebug.start_with_request=yes" >> $phpIni
-        devenv up --detach
-        sail build --quiet
-        devenv processes stop
-      fi
+      echo '> Applying XDebug Patch...'
+      patch --forward -r - --batch vendor/laravel/sail/runtimes/8.3/php.ini < ${../../../diff/xdebug-fix.diff}
+      # index doesnt need to be update as vendor file is not tracked 
     '' else "");
   };
 }
