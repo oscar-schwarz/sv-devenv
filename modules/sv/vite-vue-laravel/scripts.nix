@@ -33,7 +33,7 @@ in mkIf cfg.enable {
           "$@"
       '';
     };
-    beste-schule-install = {
+    vite-vue-laravel-install = {
       description = ''
         Installs all dependencies, creates, migrates and seeds the database.
       '';
