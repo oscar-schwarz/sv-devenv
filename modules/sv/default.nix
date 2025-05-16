@@ -20,7 +20,7 @@
 
   # commands to use in enterShell
   jq = lib.getExe pkgs.jq + " --raw-output";
-  glow = lib.getExe pkgs.glow " --width 0 ";
+  glow = lib.getExe pkgs.glow + " --width 0 ";
 in {
   options.sv = {};
   config = mkIf cfgLib.enable {
@@ -55,26 +55,26 @@ in {
       | ${glow}
 
 
-      # --- Check for new version of the flake
+      # --- Check for new version of the flake (only if found in lock)
+      if [[ "$(cat devenv.lock | jq '.nodes."sv-devenv"')" != "null" ]]; then
 
-      # --- Get repository information and current revision (commit hash) from lockfile
-      export locked=$(cat devenv.lock | ${jq} '.nodes."sv-devenv".locked')
-      export owner=$(echo $locked | ${jq} '.owner')
-      export repo=$(echo $locked | ${jq} '.repo')
-      export currentRev=$(echo $locked | ${jq} '.rev')
+        # --- Get repository information and current revision (commit hash) from lockfile
+        export locked=$(cat devenv.lock | ${jq} '.nodes."sv-devenv".locked')
+        export owner=$(echo $locked | ${jq} '.owner')
+        export repo=$(echo $locked | ${jq} '.repo')
+        export currentRev=$(echo $locked | ${jq} '.rev')
 
-      # --- Get the possibly updated revision
-      export updatedRev=$(curl -s "https://api.github.com/repos/$owner/$repo/branches" | ${jq} '.[] | select(.name == "main").commit.sha')
+        # --- Get the possibly updated revision
+        export updatedRev=$(curl -s "https://api.github.com/repos/$owner/$repo/branches" | ${jq} '.[] | select(.name == "main").commit.sha')
 
-      if [[ "$updatedRev" != "$updatedRev" ]]; then
-        echo -e '
-          **An update is available for this developer shell!**
+        if [[ "$currentRev" != "$updatedRev" ]]; then
+          echo -e '
+          ## An update is available for this developer shell!
 
-            Get the newest version with:
-          
-          `devenv update sv-devenv`
-        '\
-        | ${glow}
+          Get the newest version with: `devenv update sv-devenv`
+          '\
+          | ${glow}
+        fi
       fi
 
 
