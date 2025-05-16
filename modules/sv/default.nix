@@ -69,9 +69,9 @@ in {
 
         if [[ "$currentRev" != "$updatedRev" ]]; then
           echo -e '
-          ## An update is available for this developer shell!
+        ## An update is available for this developer shell!
 
-          Get the newest version with: `devenv update sv-devenv`
+        Get the newest version with: `devenv update sv-devenv`
           '\
           | ${glow}
         fi
