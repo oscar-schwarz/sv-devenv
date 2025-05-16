@@ -62,7 +62,7 @@ in {
       # map to commands
       (map (e: ''
         echo -e '\n${e.name}=${e.value}\n' >> .env
-        echo "${e.name} not found in $DOTENV_FILENAME file. Adding it with a default value. (${e.value})"
+        echo "${e.name} not found in .env file. Adding it with a default value. (${e.value})"
       ''))
       # concat
       concatLines

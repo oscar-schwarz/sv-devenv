@@ -70,9 +70,7 @@ in mkIf cfg.enable {
         $phpOrSail artisan migrate
 
         # --- Seed the database (Only if a seeder exists)
-        if [ -f "database/seeders/SchoolSeeder.php" ]; then
-          $phpOrSail artisan db:seed
-        fi
+        $phpOrSail artisan db:seed
 
         # --- Stop all ran processes again
         devenv processes stop

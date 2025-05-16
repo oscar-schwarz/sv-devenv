@@ -17,6 +17,10 @@
     ];
     enable = enabledModule != null;
   };
+
+  # commands to use in enterShell
+  jq = lib.getExe pkgs.jq + " --raw-output";
+  glow = lib.getExe pkgs.glow " --width 0 ";
 in {
   options.sv = {};
   config = mkIf cfgLib.enable {
@@ -48,7 +52,31 @@ in {
           '') "")
       ]}
       '\
-      | ${lib.getExe pkgs.glow} --width 0
+      | ${glow}
+
+
+      # --- Check for new version of the flake
+
+      # --- Get repository information and current revision (commit hash) from lockfile
+      export locked=$(cat devenv.lock | ${jq} '.nodes."sv-devenv".locked')
+      export owner=$(echo $locked | ${jq} '.owner')
+      export repo=$(echo $locked | ${jq} '.repo')
+      export currentRev=$(echo $locked | ${jq} '.rev')
+
+      # --- Get the possibly updated revision
+      export updatedRev=$(curl -s "https://api.github.com/repos/$owner/$repo/branches" | ${jq} '.[] | select(.name == "main").commit.sha')
+
+      if [[ "$updatedRev" != "$updatedRev" ]]; then
+        echo -e '
+          **An update is available for this developer shell!**
+
+            Get the newest version with:
+          
+          `devenv update sv-devenv`
+        '\
+        | ${glow}
+      fi
+
 
       # --- Making sure that devenv files are excluded from git history
       excludeGit=".git/info/exclude"

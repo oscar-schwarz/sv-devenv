@@ -11,7 +11,7 @@
 
   assertValidPort = name: {
     assertion = (match "^[0-9]{4,}$" config.env.${name}) != null;
-    message =".env: ${name} (${config.env.${name}}) is either not a valid port or needs super user to be used.";
+    message =".env: ${name} (${config.env.${name}}) is either not a valid port or needs super user to be used. A valid port which can be accessed by normal users is a number between 1000 and 65535.";
   };
 
   assertNoReferenceOther = name: {
@@ -34,10 +34,6 @@ in mkIf cfg.enable {
     {
       assertion = (match ".*:${config.env.APP_PORT}$" config.env.APP_URL) != null;
       message = ".env: APP_PORT (${config.env.APP_PORT}) must be the port of APP_URL (${config.env.APP_URL})";
-    }
-    {
-      assertion = (match ".*[\{\}\$].*" config.dotenv.resolved.APP_URL) == null;
-      message = ".env: APP_URL (${config.dotenv.resolved.APP_URL}) contains invalid characters. Note that this variable cannot reference other variables.";
     }
   ] ++ (if cfg.sail.enable then [
     (assertValidPort "FORWARD_DB_PORT")
