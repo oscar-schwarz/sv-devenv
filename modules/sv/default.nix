@@ -4,8 +4,8 @@
   config,
   ...
 }: let
-  inherit (builtins) attrNames length concatStringsSep head typeOf;
-  inherit (lib) pipe mkDefault mkEnableOption mkIf filterAttrs mkOption types;
+  inherit (builtins) attrNames head typeOf;
+  inherit (lib) pipe mkDefault mkIf filterAttrs;
 
   cfg = config.sv;
   # config.lib

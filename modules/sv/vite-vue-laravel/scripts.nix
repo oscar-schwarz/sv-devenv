@@ -27,9 +27,9 @@ in mkIf cfg.enable {
       '';
       exec = ''
         mariadb \
-          --user=${config.env.DB_USERNAME} \
-          --password=${config.env.DB_PASSWORD} \
-          --database=${config.env.DB_DATABASE} \
+          --user=${config.envFile.DB_USERNAME} \
+          --password=${config.envFile.DB_PASSWORD} \
+          --database=${config.envFile.DB_DATABASE} \
           "$@"
       '';
     };
@@ -54,14 +54,14 @@ in mkIf cfg.enable {
           # --- Start the sql service
           devenv up mysql --detach
           devenv up mysql-configure --detach
-          wait-for-port ${config.env.DB_PORT}
+          wait-for-port ${config.envFile.DB_PORT}
           
           # --- Start Laravel
           devenv up artisan --detach
         fi
 
         # --- Wait until everything started
-        wait-for-port ${config.env.APP_PORT}
+        wait-for-port ${config.envFile.APP_PORT}
 
         # --- Generate keys
         $phpOrSail artisan key:generate

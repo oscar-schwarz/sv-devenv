@@ -7,7 +7,8 @@
 
   keyValueRegex = ''^([A-Za-z_]+=[^#]+).*'';
 in
-filepath: pipe filepath [
+content: pipe content [
+
   # split to each line
   (splitString "\n")
 

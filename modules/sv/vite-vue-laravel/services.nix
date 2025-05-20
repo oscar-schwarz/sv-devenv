@@ -15,8 +15,8 @@ in mkIf cfg.enable {
       package = pkgs.mariadb;
       ensureUsers = [
         {
-          name = config.env.DB_USERNAME;
-          password = config.env.DB_PASSWORD;
+          name = config.envFile.DB_USERNAME;
+          password = config.envFile.DB_PASSWORD;
           ensurePermissions = {
             "*.*" = "ALL PRIVILEGES";
           };
@@ -24,13 +24,13 @@ in mkIf cfg.enable {
       ];
       initialDatabases = [
         {
-          name = config.env.DB_DATABASE;
+          name = config.envFile.DB_DATABASE;
         }
       ];
       settings = {
         mysqld = {
-          port = config.env.DB_PORT;
-          bind-address = config.env.DB_HOST;
+          port = config.envFile.DB_PORT;
+          bind-address = config.envFile.DB_HOST;
         };
       };
     };
@@ -38,8 +38,8 @@ in mkIf cfg.enable {
     # Email testing
     mailpit = {
       enable = true;
-      smtpListenAddress = "${config.env.MAIL_HOST}:${config.env.MAIL_PORT}";
-      uiListenAddress = "${config.env.MAIL_HOST}:${config.env.MAIL_UI_PORT}";
+      smtpListenAddress = "${config.envFile.MAIL_HOST}:${config.envFile.MAIL_PORT}";
+      uiListenAddress = "${config.envFile.MAIL_HOST}:${config.envFile.MAIL_UI_PORT}";
     };
 
     # Adminer for accessing the database (localhost:8080 by default)

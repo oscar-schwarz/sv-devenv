@@ -28,7 +28,7 @@ in mkIf cfg.enable {
       };
     };
     vite = {
-      exec = "sail npm install; sail npm run dev -- --port ${config.env.VITE_PORT}";
+      exec = "sail npm install; sail npm run dev -- --port ${config.envFile.VITE_PORT}";
       process-compose = {
         availability.restart = "on_failure";
         depends_on.sail.condition = "process_log_ready";
@@ -42,6 +42,6 @@ in mkIf cfg.enable {
   {
     laravel.exec = "php artisan serve";
     laravel-worker.exec = "php artisan queue:work";
-    vite.exec = "npm run dev -- --port ${config.env.VITE_PORT}";
+    vite.exec = "npm run dev -- --port ${config.envFile.VITE_PORT}";
   };
 }

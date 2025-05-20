@@ -1,60 +1,44 @@
-{ lib, config, ... }: let 
-  inherit (builtins) attrNames replaceStrings attrValues elem filter match head;
-  inherit (lib) mkIf pipe mkOption attrsToList types concatLines removeSuffix mapAttrs;
+{ lib, config, self, options, ... }: let 
+  inherit (builtins) attrNames elem filter pathExists readFile;
+  inherit (lib) mkIf pipe mkOption attrsToList types concatLines;
+  inherit (config.lib) fromDotenv;
 
   cfgLib = config.lib.sv;
 in {
-  options.dotenv = {
-    defaults = mkOption {
+  options = {
+    dotenv = {
+      defaults = mkOption {
+        description = ''
+          The default values for certain values that are not found in the .env file.
+        '';
+        type = with types; attrsOf str;
+        default = {};
+      };
+    };
+
+    envFile = mkOption {
       description = ''
-        The default values for certain values that are not found in the .env file.
+        Devenv does not parse .env files correctly. We also need to substitute variables and remove comments. This is done here.
       '';
-      type = with types; attrsOf str;
+      type = options.env.type;
       default = {};
     };
   };
 
   config = mkIf cfgLib.enable {
-    dotenv.enable = true;
 
-    # Post process values from .env
-    env = pipe config.dotenv.resolved [
-      # add the defaults
-      (set: config.dotenv.defaults // set)
+    # We are rejecting the devenv dotenv integration because of the following reasons
+    # 1. It is incomplete, it does not substitute variables such as VAR=$(OTHER)
+    # 2. does not remove comments behind a declaration
+    # 3. there is no easy way to parse the .env file without adding it to the environment.
+    dotenv = {
+      enable = false;
+      disableHint = true;
+      resolved = if pathExists "${self}/.env" then fromDotenv (readFile "${self}/.env") else {};
+    };
+    envFile = config.dotenv.defaults // config.dotenv.resolved;
 
-      # strip away comments at the end and quotation marks
-      (mapAttrs (_: value: 
-        pipe value [
-          (match "([^#]*)#.*") # find valid part of value
-          
-          (groups: if groups == null then value else head groups) # get valid part from matches
-
-          # remove quotation marks
-          (replaceStrings ["\""] [""])
-
-          # dumb way of remove trailing spaces
-          (removeSuffix " ")
-          (removeSuffix "  ")
-          (removeSuffix "   ")
-        ]
-      ))
-
-      # Now we need to substitute any variables (in dotenv you can reference another variable with ${VAR})
-      (set: mapAttrs (name: value: 
-        replaceStrings
-          (map (name: "\${${name}}") (attrNames set))
-          (attrValues set)
-          value
-      ) set)
-    ];
-
-    enterShell = 
-    # We need to unset the variables as the env variables being defined in the shell breaks some things 
-     (pipe config.dotenv.resolved [
-        attrNames # only names
-        (map (e: "unset ${e}")) # add command to unset each env var
-        concatLines # concat to string
-      ])
+    enterShell = ""
     # insert varaibles into .env which have defaults defined
     + (pipe config.dotenv.defaults) [
       attrsToList

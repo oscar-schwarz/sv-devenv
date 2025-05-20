@@ -30,7 +30,7 @@ in mkIf cfg.enable {
           [XDebug]
           xdebug.mode=debug
           xdebug.start_with_request=yes
-          xdebug.client_port=${config.env.XDEBUG_PORT}
+          xdebug.client_port=${config.envFile.XDEBUG_PORT}
         '';
       });
     };
