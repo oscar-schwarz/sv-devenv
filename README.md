@@ -30,7 +30,7 @@ use devenv
 
 ## Configuration
 
-To get started with the vite-vue-laravel repository with sail enabled put this into your config:
+To get started with the vite-vue-laravel repository with sail enabled put this into your `devenv.nix`:
 
 ```nix
 sv.vite-vue-laravel = {
