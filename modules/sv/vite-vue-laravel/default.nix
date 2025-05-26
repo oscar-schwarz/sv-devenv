@@ -21,7 +21,7 @@ in {
     enterShell = ""
       + (if cfg.enableHMRPatch then ''
       echo '> Applying Vite HMR Patch...'
-      patch --no-backup-if-mismatch -r - < ${../../../diff/hmr-fix.diff}
+      patch --forward --no-backup-if-mismatch -r - < ${../../../diff/hmr-fix.diff}
       git update-index --assume-unchanged vite.config.js
       '' else "");
 
