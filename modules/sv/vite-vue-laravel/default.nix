@@ -9,10 +9,22 @@
 
   cfg = config.sv.vite-vue-laravel;
 in {
+  imports = [
+    (lib.mkRenamedOptionModule ["sv" "vite-vue-laravel" "sail" "enableHMRPatch"] ["sv" "vite-vue-laravel" "enableHMRPatch"])
+  ];
+
   options.sv.vite-vue-laravel = {
     enable = mkEnableOption "development environment for a project using Vue for a JS frontend, Vite for bundling it and Laravel as a backend";
+    enableHMRPatch = mkEnableOption "the patch that attempts to fix Vite HMR in case it doesn't work";
   };
   config = mkIf cfg.enable {
+    enterShell = ""
+      + (if cfg.enableHMRPatch then ''
+      echo '> Applying Vite HMR Patch...'
+      patch --no-backup-if-mismatch -r - < ${../../../diff/hmr-fix.diff}
+      git update-index --assume-unchanged vite.config.js
+      '' else "");
+
     git-hooks.hooks = {
       check-types-ts = {
         enable = true;

@@ -13,6 +13,7 @@ in {
   };
   config = mkIf cfg.enable {
     languages.javascript = {
+      package = pkgs.nodejs_20;
       enable = true;
       npm.enable = true;
     };

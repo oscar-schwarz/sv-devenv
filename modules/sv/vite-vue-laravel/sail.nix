@@ -25,7 +25,6 @@ in {
         type = types.str;
       };
     };
-    enableHMRPatch = mkEnableOption "the patch that fixes Vite HMR in the container";
     enableXDebugPatch = mkEnableOption "the patch that fixes XDebug inside the container";
   };
  
@@ -62,11 +61,6 @@ in {
         # --- dockerd needs that to function properly
         export DOCKER_HOST=unix://$DEVENV_STATE/dockerd.sock
         export DOCKERD_ROOTLESS_ROOTLESSKIT_DISABLE_HOST_LOOPBACK=false
-    '' else "")
-    + (if cfg.enableHMRPatch then ''
-      echo '> Applying Vite HMR Patch...'
-      patch --forward -r - < ${../../../diff/hmr-fix.diff}
-      git update-index --assume-unchanged vite.config.js
     '' else "")
     + (if cfg.enableXDebugPatch then ''
       echo '> Applying XDebug Patch...'
