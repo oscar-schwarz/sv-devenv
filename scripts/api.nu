@@ -7,7 +7,7 @@ def maybe_apply [ ok: bool func: closure ] {
     if $ok { do $func $in } else { $in }
 }
 # Main function
-def main [ path: string ...select: cell-path --token (-t): string --explore (-x) --host: string = "http://localhost:8000" --raw (-r) --dbdebug (-d) ] {
+def main [ path: string ...select: cell-path --token (-t): string --explore (-x) --host: string --raw (-r) --dbdebug (-d) --post-body (-b): record ] {
     # Extract token from environment if not passed explicitely
     let token = if $token != null {
     echo $token
@@ -16,13 +16,32 @@ def main [ path: string ...select: cell-path --token (-t): string --explore (-x)
     } else {
     error make { msg: "TOKEN_L2 environment variable is not set. Provide a token with `--token TOKEN`" label: { span: (metadata $token).span, text: "--token TOKEN not provided" }}
     }
+
+    # load .env file if exists
+    let dotEnv = if (".env" | path exists) {open .env | parse "{key}={value}" | transpose -r -d} else {{}}
+    
+    # get host from .env file if not defined
+    let host = if $host != null {
+        echo $host
+    } else if "APP_URL" in $dotEnv {
+        echo $dotEnv.APP_URL
+    } else {
+        echo "http://localhost:8000"
+    }
     # Construct the url
     let url = $"($host)/api($path | ensure_leading_slash)"
     # Fetch from the api!
-    http get $url --allow-errors --full --headers [
+    # use post if post_body is defined
+    let headers = [
         "Accept" "application/json"
+        "Content-Type" "application/json"
         "Authorization" $"Bearer ($token)"
     ]
+    if ($post_body != null) {
+        http post $url --allow-errors --full --headers $headers ($post_body | to json)
+    } else {
+        http get $url --allow-errors --full --headers $headers
+    }
     | if $in.status == 200 {
         $in.body.data | maybe_apply ($select != null) { select ...$select }
     } else {
