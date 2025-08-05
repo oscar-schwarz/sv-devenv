@@ -7,7 +7,7 @@ def maybe_apply [ ok: bool func: closure ] {
     if $ok { do $func $in } else { $in }
 }
 # Main function
-def main [ path: string ...select: cell-path --token (-t): string --explore (-x) --host: string --raw (-r) --dbdebug (-d) --post-body (-b): record ] {
+def main [ path: string ...select: cell-path --token (-t): string --explore (-x) --host: string --raw (-r) --dbdebug (-d) --body (-b): string --method (-m): string = "get" ] {
     # Extract token from environment if not passed explicitely
     let token = if $token != null {
     echo $token
@@ -37,10 +37,12 @@ def main [ path: string ...select: cell-path --token (-t): string --explore (-x)
         "Content-Type" "application/json"
         "Authorization" $"Bearer ($token)"
     ]
-    if ($post_body != null) {
-        http post $url --allow-errors --full --headers $headers ($post_body | to json)
-    } else {
-        http get $url --allow-errors --full --headers $headers
+
+    match ($method | str upcase) {
+        "POST" => (http post $url --allow-errors --full --headers $headers $body),
+        "PUT" => (http put $url --allow-errors --full --headers $headers $body),
+        "GET" => (http get $url --allow-errors --full --headers $headers),
+        _ => (error make {msg: $"HTTP method \"($method | str upcase)\" is not supported"})
     }
     | if $in.status == 200 {
         $in.body.data | maybe_apply ($select != null) { select ...$select }
