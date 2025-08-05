@@ -1,4 +1,5 @@
-{ 
+{
+  inputs,
   pkgs,
   lib,
   config,
@@ -17,6 +18,12 @@ in {
       enable = true;
       npm.enable = true;
     };
+    
+    # Fix for javascript heap out of memory
+    env = {
+      NODE_OPTIONS="--max-old-space-size=4096";
+      CAPACITOR_ANDROID_STUDIO_PATH = lib.getExe config.android.android-studio.package;
+    };
 
     processes = {
       nuxt.exec = "npm run dev -- --port 3000 --debug";
@@ -29,33 +36,33 @@ in {
 
     android = {
       enable = true;
-      platforms.version = [ "28" "29" "30" "34" ];
+      platforms.version = [ "34" "36" ];
       systemImageTypes = [ "google_apis_playstore" ];
       abis = [ "armeabi-v7a" "arm64-v8a" ];
       cmake.version = [ "3.18.1" ];
       cmdLineTools.version = "11.0";
       tools.version = "26.1.1";
-      platformTools.version = "34.0.1";
+      platformTools.version = "36.0.0";
       buildTools.version = [ "34.0.0" ];
       emulator.enable = false;
       sources.enable = false;
       systemImages.enable = true;
       ndk.enable = true;
       googleAPIs.enable = true;
-      googleTVAddOns.enable = true;
+      # googleTVAddOns.enable = true;
       extras = [ "extras;google;gcm" ];
-      extraLicenses = [
-        "android-sdk-preview-license"
-        "android-googletv-license"
-        "android-sdk-arm-dbt-license"
-        "google-gdk-license"
-        "intel-android-extra-license"
-        "intel-android-sysimage-license"
-        "mips-android-sysimage-license"
-      ];
+      # extraLicenses = [
+      #   "android-sdk-preview-license"
+      #   "android-googletv-license"
+      #   "android-sdk-arm-dbt-license"
+      #   "google-gdk-license"
+      #   "intel-android-extra-license"
+      #   "intel-android-sysimage-license"
+      #   "mips-android-sysimage-license"
+      # ];
       android-studio = {
         enable = true;
-        package = pkgs.android-studio;
+        # package = pkgs.android-studio;
       };
     };
 
