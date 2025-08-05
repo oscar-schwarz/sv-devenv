@@ -35,6 +35,11 @@ in {
       docker
     ] else []);
 
+    env = mkIf cfg.dockerd.enable {
+      DOCKER_HOST = "unix://${config.env.DEVENV_STATE}/dockerd.sock";
+      DOCKERD_ROOTLESS_ROOTLESSKIT_DISABLE_HOST_LOOPBACK = "false";
+    };
+
     # Shell hook things specific to container mode of web
     enterShell = ''
       # --- Add scripts from vendor/bin to path
@@ -57,11 +62,6 @@ in {
         ' | ${lib.getExe pkgs.glow}
       fi
     ''
-    + (if cfg.dockerd.enable then ''
-        # --- dockerd needs that to function properly
-        export DOCKER_HOST=unix://$DEVENV_STATE/dockerd.sock
-        export DOCKERD_ROOTLESS_ROOTLESSKIT_DISABLE_HOST_LOOPBACK=false
-    '' else "")
     + (if cfg.enableXDebugPatch then ''
       echo '> Applying XDebug Patch...'
       patch --forward -r - --batch vendor/laravel/sail/runtimes/8.3/php.ini < ${../../../diff/xdebug-fix.diff}
