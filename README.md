@@ -13,8 +13,8 @@ devenv inputs add sv-devenv github:oscar-schwarz/sv-devenv
 
 3. Then import the module inside of the `devenv.nix` to access all the options under [Configuration](#Configuration)
 ```nix
-{ inputs, ... }:
-  imports = [ inputs.sv-devenv.outputs.devenvModule ];
+{ inputs, ... }: {
+  imports = [ inputs.sv-devenv.devenvModule ];
 }
 ```
 
