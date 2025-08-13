@@ -7,13 +7,13 @@
   inherit (builtins) readFile;
   inherit (lib) mkEnableOption mkIf;
 
-  cfg = config.sv.vite-vue-laravel;
+  cfg = config.sv.laravel-sail;
 in {
   imports = [
-    (lib.mkRenamedOptionModule ["sv" "vite-vue-laravel" "sail" "enableHMRPatch"] ["sv" "vite-vue-laravel" "enableHMRPatch"])
+    (lib.mkRenamedOptionModule ["sv" "laravel-sail" "sail" "enableHMRPatch"] ["sv" "laravel-sail" "enableHMRPatch"])
   ];
 
-  options.sv.vite-vue-laravel = {
+  options.sv.laravel-sail = {
     enable = mkEnableOption "development environment for a project using Vue for a JS frontend, Vite for bundling it and Laravel as a backend";
     enableHMRPatch = mkEnableOption "the patch that attempts to fix Vite HMR in case it doesn't work";
   };

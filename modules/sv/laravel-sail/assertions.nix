@@ -7,7 +7,7 @@
   inherit (builtins) match elem;
   inherit (lib) mkIf;
 
-  cfg = config.sv.vite-vue-laravel;
+  cfg = config.sv.laravel-sail;
 
   assertValidPort = name: {
     assertion = (match "^[0-9]{4,}$" config.envFile.${name}) != null;

@@ -8,9 +8,9 @@
   inherit (lib) mkIf mkEnableOption mkOption types pipe;
   boolStr = bool: if bool then "true" else "false";
 
-  cfg = config.sv.vite-vue-laravel.sail;
+  cfg = config.sv.laravel-sail.sail;
 in {
-  options.sv.vite-vue-laravel.sail = {
+  options.sv.laravel-sail.sail = {
     enable = mkEnableOption "the containerized version of Laravel";
     dockerd = {
       enable = mkEnableOption "docker daemon running as a process. Removes to the need to having a container engine running.";

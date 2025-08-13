@@ -6,7 +6,7 @@
 }: let
   inherit (lib) mkIf;
 
-  cfg = config.sv.vite-vue-laravel;
+  cfg = config.sv.laravel-sail;
 in mkIf cfg.enable {
   services = mkIf (!cfg.sail.enable) { # not needed when using container
     # Database

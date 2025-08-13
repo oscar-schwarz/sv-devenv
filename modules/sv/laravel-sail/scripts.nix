@@ -7,7 +7,7 @@
   inherit (builtins) readFile;
   inherit (lib) mkIf;
 
-  cfg = config.sv.vite-vue-laravel;
+  cfg = config.sv.laravel-sail;
 
   boolStr = bool: if bool then "true" else "false"; 
 in mkIf cfg.enable {
@@ -33,7 +33,7 @@ in mkIf cfg.enable {
           "$@"
       '';
     };
-    vite-vue-laravel-install = {
+    laravel-sail-install = {
       description = ''
         Installs all dependencies, creates, migrates and seeds the database.
       '';
