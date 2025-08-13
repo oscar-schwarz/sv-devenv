@@ -17,21 +17,22 @@
     ];
     enable = enabledModule != null;
   };
-
-  # commands to use in enterShell
-  jq = lib.getExe pkgs.jq + " --raw-output";
-  glow = lib.getExe pkgs.glow + " --width 0 ";
 in {
   options.sv = {};
-  config = mkIf cfgLib.enable {
+  config = {
     # Some useful functions
     lib.sv = cfgLib;
     
     # Disable the cachix cache by default
     cachix.enable = mkDefault false;
 
+    packages = with pkgs; [
+      jq
+      glow
+    ];
+
     # Define a welcome message when opening the shell
-    enterShell = ''
+    enterShell = mkIf cfgLib.enable /*bash*/''
       # --- Show available scripts and a welcome message
       echo -e '
       # SV Developer Shell
@@ -52,28 +53,28 @@ in {
           '') "")
       ]}
       '\
-      | ${glow}
+      | glow --width 0
 
 
       # --- Check for new version of the flake (only if found in lock)
       if [[ "$(cat devenv.lock | jq '.nodes."sv-devenv"')" != "null" ]]; then
 
         # --- Get repository information and current revision (commit hash) from lockfile
-        export locked=$(cat devenv.lock | ${jq} '.nodes."sv-devenv".locked')
-        export owner=$(echo $locked | ${jq} '.owner')
-        export repo=$(echo $locked | ${jq} '.repo')
-        export currentRev=$(echo $locked | ${jq} '.rev')
+        export locked=$(cat devenv.lock | jq -r '.nodes."sv-devenv".locked')
+        export owner=$(echo $locked | jq -r '.owner')
+        export repo=$(echo $locked | jq -r '.repo')
+        export currentRev=$(echo $locked | jq -r '.rev')
 
         # --- Get the possibly updated revision
-        export updatedRev=$(curl -s "https://api.github.com/repos/$owner/$repo/branches" | ${jq} '.[] | select(.name == "main").commit.sha')
+        export updatedRev=$(curl -s "https://api.github.com/repos/$owner/$repo/branches" | jq -r 'if .message == null then .[] | select(.name == "main").commit.sha else "Not found" end')
 
-        if [[ "$currentRev" != "$updatedRev" ]]; then
+        if [[ "$currentRev" != "Not found" ]] && [[ "$currentRev" != "$updatedRev" ]]; then
           echo -e '
         ## An update is available for this developer shell!
 
         Get the newest version with: `devenv update sv-devenv`
           '\
-          | ${glow}
+          | glow --width 0
         fi
       fi
 
@@ -90,7 +91,7 @@ in {
     '';
 
     # Git hooks needed in any module
-    git-hooks.hooks = {
+    git-hooks.hooks = mkIf cfgLib.enable {
       check-added-large-files.enable = true;
       check-merge-conflicts.enable = true;
       shellcheck.enable = true;
