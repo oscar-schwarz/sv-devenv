@@ -29,15 +29,13 @@ in mkIf cfg.enable {
       assertion = (match ".*:${config.envFile.APP_PORT}$" config.envFile.APP_URL) != null;
       message = ".env: APP_PORT (${config.envFile.APP_PORT}) must be the port of APP_URL (${config.envFile.APP_URL})";
     }
-  ] ++ (if cfg.sail.enable then [
-    (assertValidPort "FORWARD_DB_PORT")
     {
       assertion = (match ".*[/():.].*" config.envFile.DB_HOST) == null;
-      message =".env: DB_HOST (${config.envFile.DB_HOST}) contains invalid characters. In sail mode, this needs to be a container name such as 'mariadb'";
+      message =".env: DB_HOST (${config.envFile.DB_HOST}) contains invalid characters. This needs to be a container name such as 'mariadb'";
     }
-    {
-      assertion = (!cfg.sail.dockerd.enable) || (!cfg.sail.enableXDebugPatch) || (match ".*dockerd-rootless.*" cfg.sail.dockerd.exec == null) || (config.envFile.SAIL_XDEBUG_CONFIG == "client_host=10.0.2.2");
-      message = ".env: SAIL_XDEBUG_CONFIG (${config.envFile.SAIL_XDEBUG_CONFIG}) needs to be set to 'client_host=10.0.2.2' so that the laravel container can reach the host for debugging.";
-    }
-  ] else []);
+    # {
+      # assertion = (config.envFile.SAIL_XDEBUG_CONFIG == "client_host=10.0.2.2");
+      # message = ".env: SAIL_XDEBUG_CONFIG (${config.envFile.SAIL_XDEBUG_CONFIG}) needs to be set to 'client_host=10.0.2.2' so that the laravel container can reach the host for debugging.";
+    # }
+  ];
 }

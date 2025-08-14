@@ -31,6 +31,25 @@ in {
       glow
     ];
 
+    # Define available patches
+    patches = {
+      xdebug = {
+        diffFile = ../diff/xdebug-fix.diff;
+        patchedFile = {
+          localPath = "vendor/laravel/sail/runtimes/8.3/php.ini";
+          isTracked = false;
+        };
+      };
+      
+      viteHmr = {
+        diffFile = ../diff/hmr-fix.diff;
+        patchedFile = {
+          localPath = "vite.config.js";
+          isTracked = true;
+        };
+      };
+    };
+
     # Define a welcome message when opening the shell
     enterShell = mkIf cfgLib.enable /*bash*/''
       # --- Show available scripts and a welcome message
