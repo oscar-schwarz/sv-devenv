@@ -2,10 +2,10 @@
   lib,
   ...
 }: let 
-  inherit (builtins) filter match listToAttrs head replaceStrings;
+  inherit (builtins) filter match listToAttrs head replaceStrings tail concatStringsSep;
   inherit (lib) pipe splitString last removeSuffix;
 
-  keyValueRegex = ''^([A-Za-z_]+=[^#]+).*'';
+  keyValueRegex = ''^([A-Za-z_]+=[^#]+).*$'';
 in
 content: pipe content [
 
@@ -28,7 +28,10 @@ content: pipe content [
   in {
     name = head keyValuePair;
     value = pipe keyValuePair [
-      last # take value
+      # take the other elements and concat them again with =
+      tail
+      (concatStringsSep "=")
+      
       (replaceStrings ["\""] [""]) # remove "
       # dumb way of remove trailing spaces
       (removeSuffix " ")
