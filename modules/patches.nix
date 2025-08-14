@@ -37,8 +37,8 @@
     (filterAttrs (_: patch: patch.enable))
     (mapAttrsToList (name: patch: ''
       echo '> Applying ${name} patch...'
-      patch --forward --no-backup-if-mismatch -r - < ${patch.diffFile}
-    '' + (if !patch.patchedFile.isTracked then ''
+      patch --forward --no-backup-if-mismatch -r - ${patch.patchedFile.localPath} < ${patch.diffFile}
+    '' + (if patch.patchedFile.isTracked then ''
       git update-index --assume-unchanged ${patch.patchedFile.localPath}
     '' else "")))
     (concatStringsSep "\n")

@@ -60,12 +60,16 @@ in {
           Sets the environment up for development on laravel sail. Do this before using `devenv up` the first time.
         '';
         exec = /*bash*/''
+          set -e
+          
           # Fix permission issues with podman
           if [ ! -d node_modules ]; then
             mkdir node_modules
           fi
+          set +e
           chmod 777 . -R
-          get checkout -- . # remove permission changes from tracked files
+          set -e
+          git checkout -- . # remove permission changes from tracked files
           
           # Install dependencies and start container
           composer install

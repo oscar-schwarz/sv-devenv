@@ -34,7 +34,7 @@ in {
     # Define available patches
     patches = {
       xdebug = {
-        diffFile = ../diff/xdebug-fix.diff;
+        diffFile = ../../diff/xdebug-fix.diff;
         patchedFile = {
           localPath = "vendor/laravel/sail/runtimes/8.3/php.ini";
           isTracked = false;
@@ -42,7 +42,7 @@ in {
       };
       
       viteHmr = {
-        diffFile = ../diff/hmr-fix.diff;
+        diffFile = ../../diff/hmr-fix.diff;
         patchedFile = {
           localPath = "vite.config.js";
           isTracked = true;

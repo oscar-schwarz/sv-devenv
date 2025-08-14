@@ -1,7 +1,7 @@
-5c5,7
-< pcov.directory = .
-\ No newline at end of file
----
-> pcov.directory = .
-> [xdebug]
-> start_with_request=yes
+--- vendor/laravel/sail/runtimes/8.3/php_old.ini	2025-08-14 13:56:04.149626769 +0200
++++ vendor/laravel/sail/runtimes/8.3/php.ini	2025-08-14 13:56:25.655672622 +0200
+@@ -3,3 +3,4 @@
+ upload_max_filesize = 100M
+ variables_order = EGPCS
+ pcov.directory = .
++xdebug.start_with_request=yes
