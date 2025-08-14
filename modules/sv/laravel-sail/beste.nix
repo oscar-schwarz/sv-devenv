@@ -29,5 +29,13 @@ in {
         '';
       });
     };
+    
+    # VITE_APP_ENV assertion
+    assertions = [
+      {
+        assertion = config.envFile.APP_ENV == config.envFile.VITE_APP_ENV;
+        message = ".env: APP_ENV (${config.envFile.APP_ENV}) and VITE_APP_ENV (${config.envFile.VITE_APP_ENV}) are not equal."; 
+      }
+    ];
   };
 }

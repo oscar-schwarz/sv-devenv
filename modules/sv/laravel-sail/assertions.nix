@@ -18,10 +18,6 @@ in mkIf cfg.enable {
   assertions = [
     (assertValidPort "APP_PORT")
     {
-      assertion = config.envFile.APP_ENV == config.envFile.VITE_APP_ENV;
-      message = ".env: APP_ENV (${config.envFile.APP_ENV}) and VITE_APP_ENV (${config.envFile.VITE_APP_ENV}) are not equal."; 
-    }
-    {
       assertion = (match "^http://(localhost|127.0.0.1):[0-9].*" config.envFile.APP_URL) != null;
       message = ".env: APP_URL (${config.envFile.APP_URL}) is either not a valid URL, not a localhost URL or not on port that can be accessed without root."; 
     }
