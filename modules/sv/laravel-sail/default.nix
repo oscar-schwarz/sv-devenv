@@ -28,7 +28,7 @@ in {
       podman-compose
       (writeShellScriptBin "docker" "${pkgs.podman}/bin/podman \"$@\"")
     ];
-
+    
     enterShell = /*bash*/''
       # Add scripts from vendor/bin to path
       export PATH="$PATH:$DEVENV_ROOT/vendor/bin"
@@ -100,9 +100,10 @@ in {
     };
 
     processes = {  
-      sail = {
+      sail-up = {
         exec = ''
           sail down
+          sail build
           sail up --detach
         '';
         process-compose = {
@@ -114,13 +115,16 @@ in {
       };
       queue-worker = {
         exec = "sail php artisan queue:work";
-        process-compose.depends_on.sail.condition = "process_completed_successfully";
+        process-compose = {
+          depends_on.sail-up.condition = "process_completed_successfully";
+          availability.restart = "on_failure";
+        };
       };
     } // (optionalAttrs cfg.nodejs-frontend.enable {
       vite = {
         exec = "sail npm run dev";
         process-compose = {
-          depends_on.sail.condition = "process_completed_successfully";
+          depends_on.sail-up.condition = "process_completed_successfully";
           availability.restart = "on_failure";
         };
       };
