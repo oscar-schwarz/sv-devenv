@@ -40,11 +40,17 @@ in {
           isTracked = false;
         };
       };
-      
       viteHmr = {
         diffFile = ../../diff/hmr-fix.diff;
         patchedFile = {
           localPath = "vite.config.js";
+          isTracked = true;
+        };
+      };  
+      checkJs = {
+        diffFile = ../../diff/jsconfig-checkjs-fix.diff;
+        patchedFile = {
+          localPath = "jsconfig.json";
           isTracked = true;
         };
       };

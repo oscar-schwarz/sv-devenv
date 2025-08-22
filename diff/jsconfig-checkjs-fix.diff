@@ -1,0 +1,13 @@
+diff --git a/jsconfig.json b/jsconfig.json
+index 2821fb472..69e38e798 100644
+--- a/jsconfig.json
++++ b/jsconfig.json
+@@ -7,7 +7,7 @@
+             "@/*": ["./*"]
+         },
+         "allowJs": true,
+-        "checkJs": false,
++        "checkJs": true,
+         "strict": true,
+         "moduleResolution": "node"
+     },
