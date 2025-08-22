@@ -14,6 +14,8 @@ in {
     
     # Enable viteHmr patch
     patches.viteHmr.enable = true;
+    patches.xdebug.enable = true;
+    patches.checkJs.enable = true;
     
     # Enable check-types-ts git hook
     git-hooks.hooks.check-types-ts = {
