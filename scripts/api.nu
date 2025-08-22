@@ -32,11 +32,11 @@ def main [ path: string ...select: cell-path --token (-t): string --explore (-x)
     let url = $"($host)/api($path | ensure_leading_slash)"
     # Fetch from the api!
     # use post if post_body is defined
-    let headers = [
-        "Accept" "application/json"
-        "Content-Type" "application/json"
-        "Authorization" $"Bearer ($token)"
-    ]
+    let headers = {
+        "Accept": "application/json"
+        "Content-Type": "application/json"
+        "Authorization": $"Bearer ($token)"
+    }
 
     match ($method | str upcase) {
         "POST" => (http post $url --allow-errors --full --headers $headers $body),
@@ -45,7 +45,7 @@ def main [ path: string ...select: cell-path --token (-t): string --explore (-x)
         _ => (error make {msg: $"HTTP method \"($method | str upcase)\" is not supported"})
     }
     | if $in.status == 200 {
-        $in.body.data | maybe_apply ($select != null) { select ...$select }
+        (if ("data" in $body) {$in.body.data} else {$in.body}) | maybe_apply ($select != null) { select ...$select }
     } else {
         $in.body | maybe_apply ("trace" in $in) {
         update trace {
