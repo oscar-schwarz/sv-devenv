@@ -27,6 +27,7 @@ in {
       podman
       podman-compose
       (writeShellScriptBin "docker" "${pkgs.podman}/bin/podman \"$@\"")
+      mycli
     ];
     
     enterShell = /*bash*/''
@@ -97,6 +98,20 @@ in {
           ' | glow
         '';
       };
+      sql = {
+        description = ''
+           Connect to the database.    
+        '';
+        exec = /*bash*/''
+          mycli \
+            --port ${config.envFile.DB_PORT or "3306"} \
+            --user ${config.envFile.DB_USERNAME or ""} \
+            --password ${config.envFile.DB_PASSWORD or ""} \
+            --database ${config.envFile.DB_DATABASE} \
+            --auto-vertical-output \
+            "$@"
+        '';
+      };
     };
 
     processes = {  
@@ -109,7 +124,7 @@ in {
         process-compose = {
           shutdown = {
             command = "sail down";
-            timeout = "5s"; # Allow time for sail down to complete
+            timeout_seconds = "10"; # Allow time for sail down to complete
           };
         };
       };
