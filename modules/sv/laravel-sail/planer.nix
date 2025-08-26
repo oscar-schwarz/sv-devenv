@@ -7,8 +7,15 @@
   inherit (lib) mkIf;
 
   cfg = config.sv.laravel-sail;
+  cfgLib = config.lib;
 in {
   config = mkIf (cfg.enable && cfg.flavor == "planer") {
-    # Configuration specific to the "planer" flavor goes here
+    assertions = [
+      (cfgLib.assertionValidPort "CADDY_PORT" config.envFile)
+    ];
+        
+    sv.laravel-sail.nodejs-frontend.enable = true;
+
+    patches.useCaddyPortVariable.enable = true;
   };
 }

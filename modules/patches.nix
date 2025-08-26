@@ -51,7 +51,8 @@ in {
     description = "Configuration for patches to apply";
   };
   
-  config = {    
+  config = {
     enterShell = mkIf (patchCommands != "") patchCommands;
+    lib = {inherit patchCommands;};
   };
 }

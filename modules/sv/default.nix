@@ -54,6 +54,13 @@ in {
           isTracked = true;
         };
       };
+      useCaddyPortVariable = {
+        diffFile = ../../diff/use-caddy-port-variable.diff;
+        patchedFile = {
+          localPath = "docker-compose.yml";
+          isTracked = true;
+        };
+      };
     };
 
     # Define a welcome message when opening the shell
@@ -106,7 +113,7 @@ in {
 
       # --- Making sure that devenv files are excluded from git history
       excludeGit=".git/info/exclude"
-      files=".devenv devenv.nix devenv.local.nix devenv.yaml devenv.lock .devenv.flake.nix"
+      files=".devenv devenv.nix devenv.local.nix devenv.yaml devenv.lock .devenv.flake.nix .envrc .pre-commit-config.yaml"
       for file in $files; do
         if ! grep -q "$file" "$excludeGit"; then
           echo Adding "$file" to "$excludeGit"
