@@ -43,6 +43,7 @@ in {
             unqualified-search-registries = ["docker.io"]
           '';
       };
+      PODMAN_COMPOSE_WARNING_LOGS = "false";
     };
 
     enterShell =
@@ -179,16 +180,22 @@ in {
             sail up --detach
           '';
           process-compose = {
+            is_daemon = true;
             shutdown = {
               command = "sail down";
               timeout_seconds = 10; # Allow time for sail down to complete
+            };
+            readiness_probe = {
+              exec.command = "podman compose exec laravel.test echo";
+              initial_delay_seconds = 10;
+              period_seconds = 5;
             };
           };
         };
         queue-worker = {
           exec = "sail php artisan queue:work";
           process-compose = {
-            depends_on.sail-up.condition = "process_completed_successfully";
+            depends_on.sail-up.condition = "process_healthy";
             availability.restart = "on_failure";
           };
         };
@@ -197,7 +204,7 @@ in {
         vite = {
           exec = "sail npm run dev";
           process-compose = {
-            depends_on.sail-up.condition = "process_completed_successfully";
+            depends_on.sail-up.condition = "process_healthy";
             availability.restart = "on_failure";
           };
         };
