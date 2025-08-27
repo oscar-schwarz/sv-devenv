@@ -13,8 +13,11 @@ in {
     assertions = [
       (cfgLib.assertionValidPort "CADDY_PORT" config.envFile)
     ];
-        
-    sv.laravel-sail.nodejs-frontend.enable = true;
+    
+    sv.laravel-sail.nodejs-frontend = {
+      enable = true;
+      needsGithubSSH = true;
+    };
 
     patches.useCaddyPortVariable.enable = true;
   };

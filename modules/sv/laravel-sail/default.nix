@@ -20,6 +20,7 @@ in {
     };
     nodejs-frontend = {
       enable = mkEnableOption "Node.js frontend support for Laravel Sail projects";
+      needsGithubSSH = mkEnableOption "npm install needs to fetch from private repositories";
     };
   };
   config = mkIf cfg.enable {
@@ -99,7 +100,36 @@ in {
             # Install dependencies and start container
             composer install
             sail up --detach
-            ${optionalString cfg.nodejs-frontend.enable "sail npm clean-install"}
+            ${optionalString cfg.nodejs-frontend.enable
+              /*
+              bash
+              */
+              ''
+                ${optionalString cfg.nodejs-frontend.needsGithubSSH
+                  /*
+                  bash
+                  */
+                  ''
+                    podman compose exec laravel.test bash -c '
+                      echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+                      eval "$(ssh-agent -s)"
+                      ssh-add ~/.ssh/id_ed25519
+                    '
+                    pubkey=$(podman compose exec laravel.test bash -c 'cat ~/.ssh/id_ed25519.pub')
+
+                    echo "
+                      This project needs access to install NPM packages that are located in private GitHub repositories.
+                      To make this possible navigate to https://github.com/settings/keys and add this SSH public key:
+                    " | glow
+                    podman compose exec laravel.test bash -c 'cat ~/.ssh/id_ed25519.pub'
+
+                    echo "
+                      If you are done hit ENTER.
+                    " | glow
+                    read
+                  ''}
+                sail npm clean-install
+              ''}
 
             # Generate APP_KEY
             sail php artisan key:generate
