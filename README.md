@@ -30,10 +30,22 @@ use devenv
 
 ## Configuration
 
-To get started with the laravel-sail repository put this into your `devenv.nix`:
+All configuration happens in the `devenv.nix` file. To get the correct development environment enable the module of the tech stack of your project. Then set the flavor to the correct project.
+
+### Laravel Sail
 
 ```nix
 sv.laravel-sail = {
   enable = true;
+  flavor = "beste"; # or "plan" or "planer"
+}
+```
+
+### Capacitor Ionic
+
+```nix
+sv.capacitor-ionic = {
+  enable = true;
+  flavor = "beste"; # or "plan"
 }
 ```
