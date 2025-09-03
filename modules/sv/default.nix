@@ -21,13 +21,18 @@
     enable = enabledModule != null;
   };
 in {
-  options.sv = {};
+  options.sv = {
+    extraWelcomeText = lib.mkOption {
+      type = lib.types.str;
+      description = "Markdown formatted text added below \"Tech Stack\" and above \"Available Commands\" in the enterShell message.";
+      default = "";
+    };
+  };
   config = {
     # Some useful functions
     lib.sv = cfgLib;
 
-    # Disable the cachix cache by default
-    cachix.enable = mkDefault false;
+    cachix.enable = mkDefault true;
 
     packages = with pkgs; [
       jq
@@ -77,7 +82,9 @@ in {
         echo -e '
         # SV Developer Shell
 
-        **Environment** `${cfgLib.enabledModule}`
+        **Tech Stack:** `${cfgLib.enabledModule}`
+
+        ${cfg.extraWelcomeText}
 
         **Available commands:**
         - `devenv up` - starts all necessary services

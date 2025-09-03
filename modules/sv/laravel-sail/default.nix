@@ -31,6 +31,11 @@ in {
       mycli
     ];
 
+    sv.extraWelcomeText =
+      if cfg.flavor != null
+      then "**Flavor:** `${cfg.flavor}`"
+      else "";
+
     env = {
       # This allows podman to pull short names such as caddy:2-alpine
       CONTAINERS_CONF = pkgs.writeTextFile {

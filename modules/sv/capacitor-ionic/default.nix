@@ -16,8 +16,19 @@ in {
       default = null;
       description = "The flavor of Capacitor Ionic configuration to use";
     };
+    containerized = mkEnableOption "containerized `npm run dev`";
   };
   config = mkIf cfg.enable {
+    packages = with pkgs; [
+      podman
+      podman-compose
+    ];
+
+    sv.extraWelcomeText =
+      if cfg.flavor != null
+      then "**Flavor:** `${cfg.flavor}`"
+      else "";
+
     languages.javascript = {
       package = pkgs.nodejs_20;
       enable = true;
@@ -30,9 +41,27 @@ in {
       CAPACITOR_ANDROID_STUDIO_PATH = lib.getExe config.android.android-studio.package;
     };
 
-    processes = {
-      nuxt.exec = "npm run dev -- --port 3000 --debug";
-    };
+    processes =
+      if cfg.containerized
+      then {
+        container = {
+          exec = ''
+            podman compose down
+            podman compose build
+            podman compose up --detach
+          '';
+          process-compose = {
+            is_daemon = true;
+            shutdown = {
+              command = "podman compose down";
+              timeout_seconds = 10;
+            };
+          };
+        };
+      }
+      else {
+        npm-run-dev.exec = "npm run dev -- --port 3000 --debug";
+      };
 
     assertions = [
       {
@@ -73,15 +102,20 @@ in {
       };
     };
 
-    scripts.build-apk.exec = ''
-      applicationId=$(grep -oP 'applicationId\s+"\K[^"]+' android/app/build.gradle)
+    scripts.run-on-android-phone = {
+      description = ''
+        Builds the app with NodeJS and Gradle to a debug APK which is then installed on the connected Android device (must be available with `adb devices`)
+      '';
+      exec = ''
+        applicationId=$(grep -oP 'applicationId\s+"\K[^"]+' android/app/build.gradle)
 
-      npm run build --prod
-      npx cap sync android
-      cd android
-      adb shell pm uninstall --user 0 $applicationId
-      ./gradlew installDebug
-      adb shell monkey -p $applicationId -c android.intent.category.LAUNCHER 1
-    '';
+        npm run build --prod
+        npx cap sync android
+        cd android
+        adb shell pm uninstall --user 0 $applicationId
+        ./gradlew installDebug
+        adb shell monkey -p $applicationId -c android.intent.category.LAUNCHER 1
+      '';
+    };
   };
 }
