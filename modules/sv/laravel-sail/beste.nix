@@ -19,7 +19,7 @@ in {
     patches.viteHmr.enable = true;
     patches.xdebug.enable = true;
     patches.checkJs.enable = true;
-    
+
     # Enable check-types-ts git hook
     git-hooks.hooks.check-types-ts = {
       enable = true;
@@ -34,12 +34,12 @@ in {
         '';
       });
     };
-    
+
     # VITE_APP_ENV assertion
     assertions = [
       {
         assertion = config.envFile.APP_ENV == config.envFile.VITE_APP_ENV;
-        message = ".env: APP_ENV (${config.envFile.APP_ENV}) and VITE_APP_ENV (${config.envFile.VITE_APP_ENV}) are not equal."; 
+        message = ".env: APP_ENV (${config.envFile.APP_ENV}) and VITE_APP_ENV (${config.envFile.VITE_APP_ENV}) are not equal.";
       }
     ];
   };

@@ -1,4 +1,10 @@
-{ lib, config, self, options, ... }: let 
+{
+  lib,
+  config,
+  self,
+  options,
+  ...
+}: let
   inherit (builtins) attrNames elem filter pathExists readFile;
   inherit (lib) mkIf pipe mkOption attrsToList types concatLines;
   inherit (config.lib) fromDotenv;
@@ -26,7 +32,6 @@ in {
   };
 
   config = mkIf cfgLib.enable {
-
     # We are rejecting the devenv dotenv integration because of the following reasons
     # 1. It is incomplete, it does not substitute variables such as VAR=$(OTHER)
     # 2. does not remove comments behind a declaration
@@ -34,22 +39,26 @@ in {
     dotenv = {
       enable = false;
       disableHint = true;
-      resolved = if pathExists "${self}/.env" then fromDotenv (readFile "${self}/.env") else {};
+      resolved =
+        if pathExists "${self}/.env"
+        then fromDotenv (readFile "${self}/.env")
+        else {};
     };
     envFile = config.dotenv.defaults // config.dotenv.resolved;
 
-    enterShell = ""
-    # insert varaibles into .env which have defaults defined
-    + (pipe config.dotenv.defaults) [
-      attrsToList
-      (filter (e: !(elem e.name (attrNames config.dotenv.resolved)))) # filter by not in env
-      # map to commands
-      (map (e: ''
-        echo -e '\n${e.name}=${e.value}\n' >> .env
-        echo "${e.name} not found in .env file. Adding it with a default value. (${e.value})"
-      ''))
-      # concat
-      concatLines
-    ];
+    enterShell =
+      ""
+      # insert varaibles into .env which have defaults defined
+      + (pipe config.dotenv.defaults) [
+        attrsToList
+        (filter (e: !(elem e.name (attrNames config.dotenv.resolved)))) # filter by not in env
+        # map to commands
+        (map (e: ''
+          echo -e '\n${e.name}=${e.value}\n' >> .env
+          echo "${e.name} not found in .env file. Adding it with a default value. (${e.value})"
+        ''))
+        # concat
+        concatLines
+      ];
   };
 }

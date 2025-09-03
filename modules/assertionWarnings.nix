@@ -3,7 +3,7 @@
   config,
   options,
   ...
-}: let 
+}: let
   inherit (builtins) filter;
   inherit (lib) mkOption pipe;
 in {

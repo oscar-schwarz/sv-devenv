@@ -2,7 +2,7 @@
   pkgs,
   lib,
   ...
-}: let 
+}: let
   inherit (builtins) replaceStrings attrNames readDir;
   inherit (lib) pipe filterAttrs listToAttrs;
 in {
@@ -14,8 +14,8 @@ in {
     (map (replaceStrings [".nix"] [""]))
     (map (name: {
       inherit name;
-      value = (import "${../lib}/${name}.nix" pkgs);
+      value = import "${../lib}/${name}.nix" pkgs;
     }))
     listToAttrs
   ];
-} 
+}
