@@ -46,10 +46,9 @@ in {
       then {
         container = {
           exec = ''
-            podman compose down
-            podman compose build
-            podman compose up --detach
-          '';
+              podman compose down
+              podman compose up --build --detach
+            :'';
           process-compose = {
             is_daemon = true;
             shutdown = {
