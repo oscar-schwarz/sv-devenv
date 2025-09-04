@@ -9,6 +9,8 @@
   cfg = config.sv.capacitor-ionic;
 in {
   config = mkIf (cfg.enable && cfg.flavor == "plan") {
-    # Flavor-specific configuration for plan will be added here
+    packages = with pkgs; [
+      yarn
+    ];
   };
 }
