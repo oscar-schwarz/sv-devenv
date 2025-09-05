@@ -37,7 +37,6 @@
     (filterAttrs (_: patch: patch.enable))
     (mapAttrsToList (name: patch:
       ''
-        echo '> Applying ${name} patch...'
         patch --forward --no-backup-if-mismatch -r - ${patch.patchedFile.localPath} < ${patch.diffFile}
       ''
       + (
@@ -48,6 +47,12 @@
         else ""
       )))
     (concatStringsSep "\n")
+    # allow errors
+    (str: ''
+      set +e
+      ${str}
+      set -e
+    '')
   ];
 in {
   options.patches = mkOption {
@@ -56,8 +61,17 @@ in {
     description = "Configuration for patches to apply";
   };
 
-  config = {
-    enterShell = mkIf (patchCommands != "") patchCommands;
+  config = mkIf (patchCommands != "") {
+    enterShell = patchCommands;
     lib = {inherit patchCommands;};
+
+    # We need to add commit hooks that apply our patches as commiting or checkout reverses the --assume-unchanged
+    git-hooks.hooks.apply-patches = {
+      enable = true;
+      entry = toString (pkgs.writeShellScript "apply-patches" patchCommands);
+      stages = ["post-checkout" "post-commit"];
+      always_run = true;
+      description = "Apply patches after git checkout and commit";
+    };
   };
 }
