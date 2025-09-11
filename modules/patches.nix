@@ -37,7 +37,8 @@
     (filterAttrs (_: patch: patch.enable))
     (mapAttrsToList (name: patch:
       ''
-        patch --forward --no-backup-if-mismatch -r - ${patch.patchedFile.localPath} < ${patch.diffFile}
+        patch --forward --no-backup-if-mismatch -r - ${patch.patchedFile.localPath} < ${patch.diffFile} > /dev/null
+        echo '> Applied ${name} patch'
       ''
       + (
         if patch.patchedFile.isTracked

@@ -20,7 +20,6 @@ in {
     };
     nodejs-frontend = {
       enable = mkEnableOption "Node.js frontend support for Laravel Sail projects";
-      needsGithubSSH = mkEnableOption "npm install needs to fetch from private repositories";
     };
   };
   config = mkIf cfg.enable {
@@ -83,7 +82,7 @@ in {
       };
       laravel-sail-install = {
         description = ''
-          Sets the environment up for development on laravel sail. Do this before using `devenv up` the first time.
+          Setup environment for laravel sail. Do this before `devenv up` and to update deps.
         '';
         exec =
           /*
@@ -91,50 +90,49 @@ in {
           */
           ''
             set -e
+            # Install dependencies and start container
+            composer install
+
+            sail up --detach
 
             # Fix permission issues with podman
             if [ ! -d node_modules ]; then
               mkdir node_modules
             fi
-            set +e
-            chmod 777 . -R
-            set -e
-            git checkout -- . # remove permission changes from tracked files
-            # reapply the patches
-            ${config.lib.patchCommands}
+            sail-root-run chmod 777 . -R
 
-            # Install dependencies and start container
-            composer install
-            sail up --detach
             ${optionalString cfg.nodejs-frontend.enable
               /*
               bash
               */
               ''
-                ${optionalString cfg.nodejs-frontend.needsGithubSSH
-                  /*
-                  bash
-                  */
-                  ''
-                    podman compose exec laravel.test bash -c '
-                      echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
-                      eval "$(ssh-agent -s)"
-                      ssh-add ~/.ssh/id_ed25519
-                    '
-                    pubkey=$(podman compose exec laravel.test bash -c 'cat ~/.ssh/id_ed25519.pub')
+                while true; do
+                  set +e
+                  sail npm install
+                  exit_code="$?"
+                  set -e
+
+                  if [ $exit_code -eq 0 ]; then
+                    break
+                  elif [ $exit_code -eq 128 ]; then
+                    sail-root-run chown sail -R /home/sail/.ssh
+                    sail-root-run chmod 700 -R /home/sail/.ssh
+                    sail-run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""'
 
                     echo "
                       This project needs access to install NPM packages that are located in private GitHub repositories.
                       To make this possible navigate to https://github.com/settings/keys and add this SSH public key:
-                    " | glow
-                    podman compose exec laravel.test bash -c 'cat ~/.ssh/id_ed25519.pub'
+                    " | sed 's/^[ ]*//' | glow
+                    sail-run bash -c 'cat ~/.ssh/id_ed25519.pub'
 
                     echo "
-                      If you are done hit ENTER.
-                    " | glow
+                      When you are done hit ENTER.
+                    " | sed 's/^[ ]*//' | glow
                     read
-                  ''}
-                sail npm clean-install
+                  else
+                    exit
+                  fi
+                done
               ''}
 
             # Generate APP_KEY
@@ -143,7 +141,7 @@ in {
             # Migrate Database
             sail php artisan migrate
 
-            sail down
+            git checkout -- . # remove permission changes from tracked files
 
             echo -e '
               **Setup done!**
@@ -173,6 +171,22 @@ in {
               --auto-vertical-output \
               "$@"
           '';
+      };
+      sail-run = {
+        description = ''
+          `sail run` for laravel sail versions pre v1.41.0
+        '';
+        exec = ''
+          sail exec --user sail laravel.test "$@"
+        '';
+      };
+      sail-root-run = {
+        description = ''
+          `sail-run` as root user.
+        '';
+        exec = ''
+          sail exec laravel.test "$@"
+        '';
       };
     };
 

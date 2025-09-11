@@ -12,7 +12,6 @@ in {
     # Enable Node.js frontend support
     sv.laravel-sail.nodejs-frontend = {
       enable = true;
-      needsGithubSSH = true;
     };
 
     # Enable viteHmr patch

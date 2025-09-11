@@ -16,7 +16,6 @@ in {
 
     sv.laravel-sail.nodejs-frontend = {
       enable = true;
-      needsGithubSSH = true;
     };
 
     patches.useCaddyPortVariable.enable = true;
