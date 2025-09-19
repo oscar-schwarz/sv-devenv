@@ -71,7 +71,7 @@ in {
 
     android = {
       enable = true;
-      platforms.version = ["34" "36"];
+      platforms.version = ["35" "36"];
       systemImageTypes = ["google_apis_playstore"];
       abis = ["armeabi-v7a" "arm64-v8a"];
       cmake.version = ["3.18.1"];
@@ -105,16 +105,27 @@ in {
       description = ''
         Builds the app with NodeJS and Gradle to a debug APK which is then installed on the connected Android device (must be available with `adb devices`)
       '';
-      exec = ''
-        applicationId=$(grep -oP 'applicationId\s+"\K[^"]+' android/app/build.gradle)
+      exec =
+        /*
+        bash
+        */
+        ''
+          set -e
 
-        npm run build --prod
-        npx cap sync android
-        cd android
-        adb shell pm uninstall --user 0 $applicationId
-        ./gradlew installDebug
-        adb shell monkey -p $applicationId -c android.intent.category.LAUNCHER 1
-      '';
+          applicationId=$(grep -oP 'applicationId\s+"\K[^"]+' android/app/build.gradle)
+
+          npm run build
+          npx cap sync android
+          cd android
+
+          # uninstalling is allowed to fail
+          set +e
+          adb shell pm uninstall --user 0 $applicationId
+          set -e
+
+          ./gradlew installDebug
+          adb shell monkey -p $applicationId -c android.intent.category.LAUNCHER 1
+        '';
     };
   };
 }
