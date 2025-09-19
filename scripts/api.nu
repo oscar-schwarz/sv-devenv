@@ -7,9 +7,22 @@ def maybe_apply [ ok: bool func: closure ] {
     if $ok { do $func $in } else { $in }
 }
 # Main function
-def main [ path: string ...select: cell-path --token (-t): string --explore (-x) --host: string --raw (-r) --dbdebug (-d) --body (-b): string --method (-m): string = "get" ] {
+def main [
+    path: string # The API endpoint without the base URL. For example "/users/create"
+    ...select: cell-path # Reduce the output to this attribute. "id" would reduce the output to a list of ids.
+    --token (-t): string # The auth token used in the 'Authorization' header. If not given the environment variable `TOKEN_L2` is tried.
+    --no-auth (-n) # Do not do authentication with the 'Authorization' header
+    --explore (-x) # Use the Nushell "explore" feature to navigate the output
+    --host: string # The API base url. Something like: "http://localhost:8080" If not provided the .env file is searched for the `SERVER_URL` variable, if nothing was found "http://localhost:8000" is the default. 
+    --raw (-r) # Do not format the output. Use that if you want to use `jq` to further parse the response.
+    --dbdebug (-d) # Do not remove the `debug` attribute from the response.
+    --body (-b): string # Body of the HTTP request
+    --method (-m): string = "get" # Method of the HTTP request
+] {
     # Extract token from environment if not passed explicitely
-    let token = if $token != null {
+    let token = if $no_auth {
+        null
+    } else if $token != null {
     echo $token
     } else if "TOKEN_L2" in $env {
     echo $env.TOKEN_L2
@@ -35,7 +48,9 @@ def main [ path: string ...select: cell-path --token (-t): string --explore (-x)
     let headers = {
         "Accept": "application/json"
         "Content-Type": "application/json"
-        "Authorization": $"Bearer ($token)"
+    }
+    | if ($token != null) {
+        insert "Authorization" $"Bearer ($token)"
     }
 
     match ($method | str upcase) {
