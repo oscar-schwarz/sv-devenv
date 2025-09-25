@@ -164,10 +164,10 @@ in {
           */
           ''
             mycli \
-              --port ${config.envFile.DB_PORT or "3306"} \
-              --user ${config.envFile.DB_USERNAME or ""} \
-              --password ${config.envFile.DB_PASSWORD or ""} \
-              --database ${config.envFile.DB_DATABASE} \
+              --port "${config.envFile.DB_PORT or "3306"}" \
+              --user "${config.envFile.DB_USERNAME or ""}" \
+              --password "${config.envFile.DB_PASSWORD or ""}" \
+              --database "${config.envFile.DB_DATABASE}" \
               --auto-vertical-output \
               "$@"
           '';
