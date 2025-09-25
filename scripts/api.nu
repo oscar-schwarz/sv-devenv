@@ -23,9 +23,9 @@ def main [
     let token = if $no_auth {
         null
     } else if $token != null {
-    echo $token
+        echo $token
     } else if "TOKEN_L2" in $env {
-    echo $env.TOKEN_L2
+        echo $env.TOKEN_L2
     } else {
     error make { msg: "TOKEN_L2 environment variable is not set. Provide a token with `--token TOKEN`" label: { span: (metadata $token).span, text: "--token TOKEN not provided" }}
     }
@@ -49,7 +49,7 @@ def main [
         "Accept": "application/json"
         "Content-Type": "application/json"
     }
-    | if ($token != null) {
+    | maybe_apply ($token != null) {
         insert "Authorization" $"Bearer ($token)"
     }
 
