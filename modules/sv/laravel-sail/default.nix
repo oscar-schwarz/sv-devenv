@@ -37,8 +37,8 @@ in {
 
     env = {
       # This allows podman to pull short names such as caddy:2-alpine
-      CONTAINERS_CONF = pkgs.writeTextFile {
-        name = "containers.conf";
+      CONTAINERS_REGISTRIES_CONF = pkgs.writeTextFile {
+        name = "registries.conf";
         text =
           /*
           toml
@@ -59,6 +59,7 @@ in {
         export PATH="$PATH:$DEVENV_ROOT/vendor/bin"
 
         # Setup podman to accept anything (yolo)
+        mkdir -p ~/.config/containers
         if [ ! -e ~/.config/containers/policy.json ]; then
           echo '{}' > ~/.config/containers/policy.json
         fi
@@ -164,7 +165,7 @@ in {
           */
           ''
             mycli \
-              --port "${config.envFile.DB_PORT or "3306"}" \
+              --port "${config.envFile.FORWARD_DB_PORT or "3306"}" \
               --user "${config.envFile.DB_USERNAME or ""}" \
               --password "${config.envFile.DB_PASSWORD or ""}" \
               --database "${config.envFile.DB_DATABASE}" \
