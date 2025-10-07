@@ -94,7 +94,7 @@ in {
             # Install dependencies and start container
             composer install
 
-            sail up --detach
+            sail up --detach --build
 
             # Fix permission issues with podman
             if [ ! -d node_modules ]; then
