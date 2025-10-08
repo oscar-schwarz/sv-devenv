@@ -100,6 +100,7 @@ in {
             if [ ! -d node_modules ]; then
               mkdir node_modules
             fi
+            git stash # stash current changes
             sail-root-run chmod 777 . -R
 
             ${optionalString cfg.nodejs-frontend.enable
@@ -143,6 +144,7 @@ in {
             sail php artisan migrate
 
             git checkout -- . # remove permission changes from tracked files
+            git stash apply # get back saved changes from above
 
             echo -e '
               **Setup done!**
