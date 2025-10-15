@@ -96,13 +96,6 @@ in {
 
             sail up --detach --build
 
-            # Fix permission issues with podman
-            if [ ! -d node_modules ]; then
-              mkdir node_modules
-            fi
-            git stash # stash current changes
-            sail-root-run chmod 777 . -R
-
             ${optionalString cfg.nodejs-frontend.enable
               /*
               bash
@@ -117,8 +110,6 @@ in {
                   if [ $exit_code -eq 0 ]; then
                     break
                   elif [ $exit_code -eq 128 ]; then
-                    sail-root-run chown sail -R /home/sail/.ssh
-                    sail-root-run chmod 700 -R /home/sail/.ssh
                     sail-run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""'
 
                     echo "
@@ -142,9 +133,6 @@ in {
 
             # Migrate Database
             sail php artisan migrate
-
-            git checkout -- . # remove permission changes from tracked files
-            git stash apply # get back saved changes from above
 
             echo -e '
               **Setup done!**
