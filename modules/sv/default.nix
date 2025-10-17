@@ -55,8 +55,8 @@ in {
           isTracked = true;
         };
       };
-      checkJs = {
-        diffFile = ../../diff/jsconfig-checkjs-fix.diff;
+      jsconfig = {
+        diffFile = ../../diff/jsconfig-fix.diff;
         patchedFile = {
           localPath = "jsconfig.json";
           isTracked = true;

@@ -1,0 +1,25 @@
+diff --git a/jsconfig.json b/jsconfig.json
+index 6d5074b25..b5aaec275 100644
+--- a/jsconfig.json
++++ b/jsconfig.json
+@@ -7,9 +7,16 @@
+             "@/*": ["./*"]
+         },
+         "allowJs": true,
+-        "checkJs": false,
++        "checkJs": true,
++        "noEmit": true,
+         "strict": true,
+         "moduleResolution": "node"
+     },
+-    "exclude": ["node_modules", "public"]
+-}
+\ No newline at end of file
++    "include": [
++        "**/*.js",
++        "**/*.d.ts",
++        "**/*.ts"
++    ],
++    "exclude": ["node_modules", "public", "vendor"]
++}
++}
