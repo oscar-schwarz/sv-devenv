@@ -59,7 +59,7 @@ So when you are trying to make changes to these files git will not notice these 
 
 1. `git update-index --no-assume-unchanged path/to/file` - make changes to git visible
 
-2. `git restore path/to/file` - remove patched changes
+2. `git add path/to/file && git stash --staged` - remove patched changes
 
 3. (make your changes and commit)
 
