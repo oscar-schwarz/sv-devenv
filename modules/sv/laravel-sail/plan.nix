@@ -13,5 +13,6 @@ in {
     sv.laravel-sail.nodejs-frontend.enable = true;
 
     patches.xdebug.enable = true;
+    patches.sailPhpSupervisorUser.enable = true;
   };
 }

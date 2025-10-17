@@ -1,0 +1,4 @@
+15c15
+< ENV SUPERVISOR_PHP_USER="sail"
+---
+> ENV SUPERVISOR_PHP_USER="root"

@@ -110,13 +110,13 @@ in {
                   if [ $exit_code -eq 0 ]; then
                     break
                   elif [ $exit_code -eq 128 ]; then
-                    sail-run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""'
+                    sail-run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f /etc/ssh/id_ed25519 -N ""'
 
                     echo "
                       This project needs access to install NPM packages that are located in private GitHub repositories.
                       To make this possible navigate to https://github.com/settings/keys and add this SSH public key:
                     " | sed 's/^[ ]*//' | glow
-                    sail-run bash -c 'cat ~/.ssh/id_ed25519.pub'
+                    sail-run bash -c 'cat /etc/ssh/id_ed25519.pub'
 
                     echo "
                       When you are done hit ENTER.

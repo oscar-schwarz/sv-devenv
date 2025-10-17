@@ -18,6 +18,7 @@ in {
     patches.viteHmr.enable = true;
     patches.xdebug.enable = true;
     patches.jsconfig.enable = true;
+    patches.sailPhpSupervisorUser.enable = true;
 
     # Enable check-types-ts git hook
     git-hooks.hooks.check-types-ts = {

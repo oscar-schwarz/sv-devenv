@@ -69,6 +69,13 @@ in {
           isTracked = true;
         };
       };
+      sailPhpSupervisorUser = {
+        diffFile = ../../diff/sail-supervisor-php-user-fix.diff;
+        patchedFile = {
+          localPath = "vendor/laravel/sail/runtimes/8.3/Dockerfile";
+          isTracked = false;
+        };
+      };
     };
 
     # Define a welcome message when opening the shell

@@ -26,5 +26,9 @@ in
         assertion = (match ".*[/():.].*" config.envFile.DB_HOST) == null;
         message = ".env: DB_HOST (${config.envFile.DB_HOST}) contains invalid characters. This needs to be a container name such as 'mariadb'";
       }
+      {
+        assertion = (config.envFile.APP_USER or "") == "root";
+        message = "APP_USER must be 'root'";
+      }
     ];
   }
