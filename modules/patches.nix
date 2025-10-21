@@ -37,8 +37,14 @@
     (filterAttrs (_: patch: patch.enable))
     (mapAttrsToList (name: patch:
       ''
-        patch --forward --no-backup-if-mismatch -r - ${patch.patchedFile.localPath} < ${patch.diffFile} > /dev/null
-        echo '> Applied ${name} patch'
+        output="$(patch --forward --no-backup-if-mismatch -r - ${patch.patchedFile.localPath} < ${patch.diffFile})"
+        if [[ $output =~ "Skipping" ]]; then
+          echo '> Skipped ${name} patch (already applied)'
+        elif [[ $output =~ "FAILED" ]]; then
+          echo '> Could not apply ${name} patch, is the diff out-of-date?'
+        else
+          echo '> Applied ${name} patch'
+        fi
       ''
       + (
         if patch.patchedFile.isTracked
