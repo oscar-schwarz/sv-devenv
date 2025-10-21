@@ -31,7 +31,26 @@ def main [
     }
 
     # load .env file if exists
-    let dotEnv = if (".env" | path exists) {open .env | parse "{key}={value}" | transpose -r -d} else {{}}
+    let dotEnv = if (".env" | path exists) {
+        open .env
+            | parse "{key}={value}"
+            | do {
+                let parsed = $in
+                return ($parsed | each {|$current|
+                    mut newValue = $current | get value                    
+                    # a very basic algorithm to substitute variables.
+                    for level in 1..3 {
+                        for item in $parsed {
+                            $newValue = $newValue | str replace --all $"${($item | get key)}" ($item | get value)
+                        }
+                    }
+                    # remove quotation marks
+                    $newValue = $newValue | str replace --all "\"" ""
+                    return ($current | update value $newValue)
+                })
+            }
+            | transpose -r -d
+    } else {{}}
     
     # get host from .env file if not defined
     let host = if $host != null {
