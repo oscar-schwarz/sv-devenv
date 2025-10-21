@@ -1,0 +1,31 @@
+diff --git a/jsconfig.json b/jsconfig.json
+index 2821fb472..9392d3f42 100644
+--- a/jsconfig.json
++++ b/jsconfig.json
+@@ -2,14 +2,21 @@
+     "compilerOptions": {
+         "target": "es2015",
+         "module": "esnext",
+-        "baseUrl": "./resources/js",
++        "baseUrl": "./resources",
+         "paths": {
+             "@/*": ["./*"]
+         },
+         "allowJs": true,
+-        "checkJs": false,
++        "checkJs": true,
++        "noEmit": true,
+         "strict": true,
+         "moduleResolution": "node"
+     },
+-    "exclude": ["node_modules", "public"]
+-}
+\ No newline at end of file
++    "include": [
++        "**/*.js",
++        "**/*.d.ts",
++        "**/*.ts",
++        "**/*.vue"
++    ],
++    "exclude": ["node_modules", "public", "vendor"]
++}
