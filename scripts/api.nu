@@ -16,7 +16,7 @@ def main [
     --host: string # The API base url. Something like: "http://localhost:8080" If not provided the .env file is searched for the `SERVER_URL` variable, if nothing was found "http://localhost:8000" is the default. 
     --raw (-r) # Do not format the output. Use that if you want to use `jq` to further parse the response.
     --dbdebug (-d) # Do not remove the `debug` attribute from the response.
-    --body (-b): string # Body of the HTTP request
+    --body (-b): string = '' # Body of the HTTP request
     --body-file (-f): path # A file that contains the body of the HTTP request
     --method (-m): string = "get" # Method of the HTTP request
 ] {
