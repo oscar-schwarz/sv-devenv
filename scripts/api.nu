@@ -17,6 +17,7 @@ def main [
     --raw (-r) # Do not format the output. Use that if you want to use `jq` to further parse the response.
     --dbdebug (-d) # Do not remove the `debug` attribute from the response.
     --body (-b): string # Body of the HTTP request
+    --body-file (-f): path # A file that contains the body of the HTTP request
     --method (-m): string = "get" # Method of the HTTP request
 ] {
     # Extract token from environment if not passed explicitely
@@ -70,6 +71,12 @@ def main [
     }
     | maybe_apply ($token != null) {
         insert "Authorization" $"Bearer ($token)"
+    }
+
+    let body = if (($body_file != null) and ($body_file | path exists)) {
+        ^cat $body_file | from json | to json --raw
+    } else {
+        $body
     }
 
     match ($method | str upcase) {
