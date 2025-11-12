@@ -140,7 +140,7 @@ in {
           };
         };
         queue-worker = {
-          exec = "sail php artisan queue:work";
+          exec = "sail php artisan queue:work --json";
           process-compose = {
             availability.restart = "on_failure";
           };
