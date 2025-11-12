@@ -85,77 +85,7 @@ in {
         description = ''
           Setup environment for laravel sail. Do this before `devenv up` and to update deps.
         '';
-        exec =
-          /*
-          bash
-          */
-          ''
-            set -e
-            # Install dependencies and start container
-            composer install
-
-            sail up --detach --build
-
-            # Fix permission issues with podman
-            if [ ! -d node_modules ]; then
-              mkdir node_modules
-            fi
-            git stash # stash current changes
-            sail-root-run chmod 777 . -R
-
-            ${optionalString cfg.nodejs-frontend.enable
-              /*
-              bash
-              */
-              ''
-                while true; do
-                  set +e
-                  sail npm install
-                  exit_code="$?"
-                  set -e
-
-                  if [ $exit_code -eq 0 ]; then
-                    break
-                  elif [ $exit_code -eq 128 ]; then
-                    sail-root-run chown sail -R /home/sail/.ssh
-                    sail-root-run chmod 700 -R /home/sail/.ssh
-                    sail-run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""'
-
-                    echo "
-                      This project needs access to install NPM packages that are located in private GitHub repositories.
-                      To make this possible navigate to https://github.com/settings/keys and add this SSH public key:
-                    " | sed 's/^[ ]*//' | glow
-                    sail-run bash -c 'cat ~/.ssh/id_ed25519.pub'
-
-                    echo "
-                      When you are done hit ENTER.
-                    " | sed 's/^[ ]*//' | glow
-                    read
-                  else
-                    exit
-                  fi
-                done
-              ''}
-
-            # Generate APP_KEY
-            sail php artisan key:generate
-
-            # Migrate Database
-            sail php artisan migrate
-
-            git checkout -- . # remove permission changes from tracked files
-            git stash apply # get back saved changes from above
-
-            echo -e '
-              **Setup done!**
-              If the application has a seeder you can seed the database with:
-              ```bash
-              sail php artisan db:seed
-              ```
-
-              Also you may now use `devenv up` to start the application.
-            ' | glow
-          '';
+        exec = "bash ${../../../scripts/laravel-sail-install.sh}";
       };
       sql = {
         description = ''
