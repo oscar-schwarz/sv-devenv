@@ -9,10 +9,7 @@
   cfg = config.sv.laravel-sail;
 in {
   config = mkIf (cfg.enable && cfg.flavor == "beste") {
-    # Enable Node.js frontend support
-    sv.laravel-sail.nodejs-frontend = {
-      enable = true;
-    };
+    sv.laravel-sail.nodejs-frontend.enable = true;
 
     # Enable viteHmr patch
     patches.viteHmr.enable = true;
