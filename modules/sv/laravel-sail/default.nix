@@ -56,7 +56,7 @@ in {
       */
       ''
         # Add scripts from vendor/bin to path
-        export PATH="$PATH:$DEVENV_ROOT/vendor/bin"
+        export PATH="vendor/bin:$PATH"
 
         # Setup podman to accept anything (yolo)
         mkdir -p ~/.config/containers

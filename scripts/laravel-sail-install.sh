@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Add php binaries to path (sail)
+export PATH="vendor/bin:$PATH"
+
 # Colors for output
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
@@ -37,7 +40,7 @@ composer install
 
 sail up --detach --build
 
-# Install node js
+# Install node packages
 if [ -e "package.json" ]; then
   while true; do
     set +e
@@ -79,5 +82,5 @@ sail php artisan migrate
 echo
 echo -e "${GREEN}✓ Setup done!${NC}"
 echo
-echo -e "\nIf the application has a seeder you can seed the database with:"
+echo -e "If the application has a seeder you can seed the database with:"
 echo -e "  ${CYAN}sail php artisan db:seed${NC}"
