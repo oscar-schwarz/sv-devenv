@@ -69,6 +69,13 @@ in {
           isTracked = true;
         };
       };
+      sail83Dockerfile = {
+        diffFile = ../../diff/sail-dockerfile.diff;
+        patchedFile = {
+          localPath = "vendor/laravel/sail/runtimes/8.3/Dockerfile";
+          isTracked = false;
+        };
+      };
     };
 
     # Define a welcome message when opening the shell

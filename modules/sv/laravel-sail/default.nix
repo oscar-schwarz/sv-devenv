@@ -35,6 +35,11 @@ in {
       then "**Flavor:** `${cfg.flavor}`"
       else "";
 
+    patches = {
+      xdebug.enable = true;
+      sail83Dockerfile.enable = true;
+    };
+
     env = {
       # This allows podman to pull short names such as caddy:2-alpine
       CONTAINERS_REGISTRIES_CONF = pkgs.writeTextFile {
