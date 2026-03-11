@@ -6,7 +6,6 @@
 }: let
   inherit (builtins) readFile;
   inherit (lib) mkEnableOption mkIf;
-  inherit (lib.strings) optionalString;
   inherit (lib.attrsets) optionalAttrs;
 
   cfg = config.sv.laravel-sail;
@@ -27,7 +26,13 @@ in {
       podman
       podman-compose
       (writeShellScriptBin "docker" "${pkgs.podman}/bin/podman \"$@\"")
-      mycli
+      (mycli.overrideAttrs (prev: {
+        pythonRelaxDeps =
+          [
+            "sqlglot"
+          ]
+          ++ prev.pythonRelaxDeps;
+      }))
     ];
 
     sv.extraWelcomeText =
