@@ -51,9 +51,8 @@ if [ -e "package.json" ]; then
     if [ $exit_code -eq 0 ]; then
       break
     elif [ $exit_code -eq 128 ]; then
-      sail-root-run chown sail -R /home/sail/.ssh
-      sail-root-run chmod 700 -R /home/sail/.ssh
-      sail-run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""'
+      sail run mkdir -p /home/sail.ssh
+      sail run bash -c 'echo "yes" | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""'
 
       echo
       echo -e "${YELLOW}This project needs access to install NPM packages that are located"
@@ -61,7 +60,7 @@ if [ -e "package.json" ]; then
       echo -e "${CYAN}https://github.com/settings/keys${NC}"
       echo -e "${YELLOW}and add this SSH public key:${NC}"
       echo
-      sail-run bash -c 'cat ~/.ssh/id_ed25519.pub'
+      sail run bash -c 'cat ~/.ssh/id_ed25519.pub'
 
       echo
       echo -e "${YELLOW}When you are done hit ENTER.${NC}"
