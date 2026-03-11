@@ -86,7 +86,7 @@ def main [
         _ => (error make {msg: $"HTTP method \"($method | str upcase)\" is not supported"})
     }
     | if $in.status == 200 {
-        (if ("data" in $in.body) {$in.body.data} else {$in.body}) | maybe_apply ($select != null) { select ...$select }
+        (if ("data" in $in.body and not $dbdebug) {$in.body.data} else {$in.body}) | maybe_apply ($select != null) { select ...$select }
     } else {
         $in.body | maybe_apply ("trace" in $in) {
         update trace {
