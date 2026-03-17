@@ -133,6 +133,8 @@ in {
       };
     };
 
+    process.manager.implementation = "process-compose";
+
     processes =
       {
         sail-up = {
@@ -143,24 +145,23 @@ in {
           '';
           process-compose = {
             is_daemon = true;
-            shutdown = {
-              command = "sail down";
-              timeout_seconds = 10; # Allow time for sail down to complete
-            };
+            shutdown.command = "sail down";
           };
         };
         queue-worker = {
           exec = "sail php artisan queue:work --json";
-          process-compose = {
-            availability.restart = "on_failure";
+          restart = {
+            on = "on_failure";
+            max = 99999;
           };
         };
       }
       // (optionalAttrs cfg.nodejs-frontend.enable {
         vite = {
           exec = "sail npm run dev";
-          process-compose = {
-            availability.restart = "on_failure";
+          restart = {
+            on = "on_failure";
+            max = 99999;
           };
         };
       });
