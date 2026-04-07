@@ -141,12 +141,8 @@ in {
           exec = ''
             sail down
             sail build
-            sail up --detach
+            sail up
           '';
-          process-compose = {
-            is_daemon = true;
-            shutdown.command = "sail down";
-          };
         };
         queue-worker = {
           exec = "sail php artisan queue:work --json";
