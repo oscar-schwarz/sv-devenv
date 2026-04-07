@@ -85,8 +85,11 @@ in {
       bash
       */
       ''
+        export PREK_ALLOW_NO_CONFIG=1
+
         # --- Show available scripts and a welcome message
         echo -e '
+
         # SV Developer Shell
 
         **Tech Stack:** `${cfgLib.enabledModule}`
