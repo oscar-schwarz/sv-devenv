@@ -78,7 +78,7 @@ in {
 
     languages.php = {
       enable = true;
-      package = pkgs.php83;
+      package = pkgs.php84;
       packages.composer = pkgs.php83Packages.composer;
     };
 
