@@ -79,7 +79,7 @@ in {
     languages.php = {
       enable = true;
       package = pkgs.php84;
-      packages.composer = pkgs.php83Packages.composer;
+      packages.composer = pkgs.php84Packages.composer;
     };
 
     scripts = {
