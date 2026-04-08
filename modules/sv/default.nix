@@ -85,8 +85,6 @@ in {
       bash
       */
       ''
-        export PREK_ALLOW_NO_CONFIG=1
-
         # --- Show available scripts and a welcome message
         echo -e '
 
@@ -148,6 +146,7 @@ in {
       '';
 
     # Git hooks needed in any module
+    env.PREK_ALLOW_NO_CONFIG = 1; # to fix worktree creation
     git-hooks.hooks = mkIf cfgLib.enable {
       check-added-large-files.enable = true;
       check-merge-conflicts.enable = true;
