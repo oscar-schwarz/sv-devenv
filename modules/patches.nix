@@ -49,7 +49,11 @@
       + (
         if patch.patchedFile.isTracked
         then ''
-          git update-index --assume-unchanged ${patch.patchedFile.localPath}
+          if [[ $output =~ "FAILED" ]]; then
+            git update-index --no-assume-unchanged ${patch.patchedFile.localPath}
+          else
+            git update-index --assume-unchanged ${patch.patchedFile.localPath}
+          fi
         ''
         else ""
       )))
