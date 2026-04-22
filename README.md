@@ -3,19 +3,21 @@
 Development environments for various specific projects
 ## Installation
 
-1. Install [devenv](https://devenv.sh/getting-started/)
-
-2. Run the following commands to initialize devenv and to add this repository:
-```
+1. Install [devenv](https://devenv.sh/getting-started/) and initialize it in your project directory
+```bash
 devenv init
-devenv inputs add sv-devenv github:oscar-schwarz/sv-devenv 
 ```
 
-3. Then import the module inside of the `devenv.nix` to access all the options under [Configuration](#Configuration)
-```nix
-{ inputs, ... }: {
-  imports = [ inputs.sv-devenv.devenvModule ];
-}
+2. Add `sv-devenv` as an input
+
+3. Then add the module into `devenv.yaml` to access all the options under [Configuration](#Configuration)
+```yaml
+inputs:
+  sv-devenv:
+    url: github/oscar-schwarz/sv-devenv
+    flake: false
+imports:
+- sv-devenv
 ```
 
 4. (Optional) Install [direnv](https://direnv.net/docs/installation.html) for automatic environment activation.
