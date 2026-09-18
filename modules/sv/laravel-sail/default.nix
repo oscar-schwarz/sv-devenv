@@ -163,7 +163,7 @@ in {
           '';
         };
         queue-worker = {
-          exec = "sail php artisan queue:work --json";
+          exec = "sail php artisan queue:work --queue=print,print-bulk,default --json";
           restart = {
             on = "on_failure";
             max = 99999;
