@@ -81,15 +81,15 @@ in {
         if [[ "$(jq -r '.nodes."sv-devenv".locked.type' devenv.lock 2>/dev/null)" == "github" ]]; then
 
           # --- Get repository information and current revision (commit hash) from lockfile
-          export locked=$(cat devenv.lock | jq -r '.nodes."sv-devenv".locked')
-          export owner=$(echo $locked | jq -r '.owner')
-          export repo=$(echo $locked | jq -r '.repo')
-          export currentRev=$(echo $locked | jq -r '.rev')
+          svOwner=$(jq -r '.nodes."sv-devenv".locked.owner' devenv.lock)
+          svRepo=$(jq -r '.nodes."sv-devenv".locked.repo' devenv.lock)
+          svRef=$(jq -r '.nodes."sv-devenv".original.ref // "main"' devenv.lock)
+          svCurrentRev=$(jq -r '.nodes."sv-devenv".locked.rev' devenv.lock)
 
-          # --- Get the possibly updated revision
-          export updatedRev=$(curl -s "https://api.github.com/repos/$owner/$repo/branches" | jq -r 'if .message == null then .[] | select(.name == "main").commit.sha else "Not found" end')
+          # --- Get the newest revision of the followed branch, empty when offline
+          svUpdatedRev=$(GIT_TERMINAL_PROMPT=0 timeout 5 ${pkgs.git}/bin/git ls-remote "https://github.com/$svOwner/$svRepo" "refs/heads/$svRef" 2>/dev/null | cut -f1)
 
-          if [[ "$currentRev" != "Not found" ]] && [[ "$currentRev" != "$updatedRev" ]]; then
+          if [[ -n "$svUpdatedRev" ]] && [[ "$svCurrentRev" != "$svUpdatedRev" ]]; then
             echo -e '
           ## An update is available for this developer shell!
 
