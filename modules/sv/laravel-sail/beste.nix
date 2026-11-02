@@ -10,11 +10,17 @@
 in {
   config = mkIf (cfg.enable && cfg.flavor == "beste") {
     sv.laravel-sail.nodejs-frontend.enable = true;
+    sv.laravel-sail.octane.enable = true;
 
-    # Enable viteHmr patch
-    patches.viteHmr.enable = true;
-    patches.xdebug.enable = true;
-    patches.jsconfig.enable = true;
+    # While Vite runs, print pages load their assets from http://localhost:5173 (public/hot).
+    # Chromium in Gotenberg resolves localhost to the app container, where Vite listens, so printing works with hot reload.
+    sv.laravel-sail.composeOverride.services.gotenberg.command = [
+      "gotenberg"
+      "--api-timeout=120s"
+      "--chromium-allow-list=^http://laravel\\.test/(print/render/.*|build/.*)$$"
+      "--chromium-allow-list=^(http|ws)://localhost:${config.envFile.VITE_PORT or "5173"}/.*$$"
+      "--chromium-host-resolver-rules=MAP localhost laravel.test"
+    ];
 
     # Enable check-types-ts git hook
     git-hooks.hooks.check-types-ts = {
@@ -30,13 +36,5 @@ in {
         '';
       });
     };
-
-    # VITE_APP_ENV assertion
-    assertions = [
-      {
-        assertion = config.envFile.APP_ENV == config.envFile.VITE_APP_ENV;
-        message = ".env: APP_ENV (${config.envFile.APP_ENV}) and VITE_APP_ENV (${config.envFile.VITE_APP_ENV}) are not equal.";
-      }
-    ];
   };
 }

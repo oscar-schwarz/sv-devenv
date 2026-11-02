@@ -5,23 +5,13 @@
   options,
   ...
 }: let
-  inherit (builtins) attrNames elem filter pathExists readFile;
-  inherit (lib) mkIf pipe mkOption attrsToList types concatLines;
+  inherit (builtins) pathExists readFile;
+  inherit (lib) mkIf mkOption;
   inherit (config.lib) fromDotenv;
 
   cfgLib = config.lib.sv;
 in {
   options = {
-    dotenv = {
-      defaults = mkOption {
-        description = ''
-          The default values for certain values that are not found in the .env file.
-        '';
-        type = with types; attrsOf str;
-        default = {};
-      };
-    };
-
     envFile = mkOption {
       description = ''
         Devenv does not parse .env files correctly. We also need to substitute variables and remove comments. This is done here.
@@ -39,26 +29,12 @@ in {
     dotenv = {
       enable = false;
       disableHint = true;
-      resolved =
-        if pathExists "${self}/.env"
-        then fromDotenv (readFile "${self}/.env")
-        else {};
+      # newer devenv versions read this even when dotenv is disabled
+      resolved = config.envFile;
     };
-    envFile = config.dotenv.defaults // config.dotenv.resolved;
-
-    enterShell =
-      ""
-      # insert varaibles into .env which have defaults defined
-      + (pipe config.dotenv.defaults) [
-        attrsToList
-        (filter (e: !(elem e.name (attrNames config.dotenv.resolved)))) # filter by not in env
-        # map to commands
-        (map (e: ''
-          echo -e '\n${e.name}=${e.value}\n' >> .env
-          echo "${e.name} not found in .env file. Adding it with a default value. (${e.value})"
-        ''))
-        # concat
-        concatLines
-      ];
+    envFile =
+      if pathExists "${self}/.env"
+      then fromDotenv (readFile "${self}/.env")
+      else {};
   };
 }

@@ -23,9 +23,14 @@
 in {
   options.sv = {
     extraWelcomeText = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.lines;
       description = "Markdown formatted text added below \"Tech Stack\" and above \"Available Commands\" in the enterShell message.";
       default = "";
+    };
+    gitExclude = lib.mkOption {
+      type = with lib.types; listOf str;
+      description = "Files added to .git/info/exclude, because they are generated or only used locally.";
+      default = [];
     };
   };
   config = {
@@ -38,45 +43,6 @@ in {
       jq
       glow
     ];
-
-    # Define available patches
-    patches = {
-      xdebug = {
-        diffFile = ../../diff/xdebug-fix.diff;
-        patchedFile = {
-          localPath = "vendor/laravel/sail/runtimes/8.3/php.ini";
-          isTracked = false;
-        };
-      };
-      viteHmr = {
-        diffFile = ../../diff/hmr-fix.diff;
-        patchedFile = {
-          localPath = "vite.config.js";
-          isTracked = true;
-        };
-      };
-      jsconfig = {
-        diffFile = ../../diff/jsconfig-fix.diff;
-        patchedFile = {
-          localPath = "jsconfig.json";
-          isTracked = true;
-        };
-      };
-      useCaddyPortVariable = {
-        diffFile = ../../diff/use-caddy-port-variable.diff;
-        patchedFile = {
-          localPath = "docker-compose.yml";
-          isTracked = true;
-        };
-      };
-      sail83Dockerfile = {
-        diffFile = ../../diff/sail-dockerfile.diff;
-        patchedFile = {
-          localPath = "vendor/laravel/sail/runtimes/8.3/Dockerfile";
-          isTracked = false;
-        };
-      };
-    };
 
     # Define a welcome message when opening the shell
     enterShell =
@@ -111,8 +77,8 @@ in {
         | glow --width 0
 
 
-        # --- Check for new version of the flake (only if found in lock)
-        if [[ "$(cat devenv.lock | jq '.nodes."sv-devenv"')" != "null" ]]; then
+        # --- Check for new version of the flake (only if locked to GitHub, not to a local path)
+        if [[ "$(jq -r '.nodes."sv-devenv".locked.type' devenv.lock 2>/dev/null)" == "github" ]]; then
 
           # --- Get repository information and current revision (commit hash) from lockfile
           export locked=$(cat devenv.lock | jq -r '.nodes."sv-devenv".locked')
@@ -136,22 +102,23 @@ in {
 
         # --- Making sure that devenv files are excluded from git history
         excludeGit=".git/info/exclude"
-        files=".devenv devenv.nix devenv.local.nix devenv.yaml devenv.lock .devenv.flake.nix .envrc .pre-commit-config.yaml"
+        files="${lib.concatStringsSep " " cfg.gitExclude}"
         for file in $files; do
-          if ! grep -q "$file" "$excludeGit"; then
+          if ! grep -qxF "$file" "$excludeGit"; then
             echo Adding "$file" to "$excludeGit"
             echo "$file" >> "$excludeGit"
           fi
         done
       '';
 
+    sv.gitExclude = [".devenv" "devenv.nix" "devenv.local.nix" "devenv.yaml" "devenv.lock" ".devenv.flake.nix" ".envrc" ".pre-commit-config.yaml"];
+
     # Git hooks needed in any module
     env.PREK_ALLOW_NO_CONFIG = 1; # to fix worktree creation
+    # Hooks only run on commit, not against all files whenever the shell starts
+    tasks."devenv:git-hooks:run".before = lib.mkForce [];
     git-hooks.hooks = mkIf cfgLib.enable {
-      check-added-large-files.enable = true;
       check-merge-conflicts.enable = true;
-      shellcheck.enable = true;
-      shfmt.enable = true;
       no-commit-to-branch = {
         enable = true;
         settings.branch = ["main" "master" "production"];

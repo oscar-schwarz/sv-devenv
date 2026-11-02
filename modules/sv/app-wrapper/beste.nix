@@ -1,14 +1,13 @@
 {
-  pkgs,
   lib,
   config,
   ...
 }: let
   inherit (lib) mkIf;
 
-  cfg = config.sv.capacitor-ionic;
+  cfg = config.sv.app-wrapper;
 in {
   config = mkIf (cfg.enable && cfg.flavor == "beste") {
-    sv.capacitor-ionic.containerized = true;
+    sv.app-wrapper.avd.name = "beste";
   };
 }

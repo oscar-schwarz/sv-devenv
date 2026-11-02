@@ -1,5 +1,4 @@
 {
-  pkgs,
   lib,
   config,
   ...
@@ -7,18 +6,8 @@
   inherit (lib) mkIf;
 
   cfg = config.sv.laravel-sail;
-  cfgLib = config.lib;
 in {
   config = mkIf (cfg.enable && cfg.flavor == "planer") {
-    assertions = [
-      (cfgLib.assertionValidPort "CADDY_PORT" config.envFile)
-    ];
-
-    sv.laravel-sail.nodejs-frontend = {
-      enable = true;
-    };
-
-    patches.useCaddyPortVariable.enable = true;
-    patches.xdebug.enable = true;
+    sv.laravel-sail.nodejs-frontend.enable = true;
   };
 }

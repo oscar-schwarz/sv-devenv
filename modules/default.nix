@@ -8,13 +8,11 @@
 in {
   imports = [
     ./patches.nix
-    ./assertionWarnings.nix
     ./dotenv.nix
 
     ./sv
-    ./sv/capacitor-ionic
-    ./sv/capacitor-ionic/beste.nix
-    ./sv/capacitor-ionic/plan.nix
+    ./sv/app-wrapper
+    ./sv/app-wrapper/beste.nix
     ./sv/laravel-sail
     ./sv/laravel-sail/beste.nix
     ./sv/laravel-sail/planer.nix

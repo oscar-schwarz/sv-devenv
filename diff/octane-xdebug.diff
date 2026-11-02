@@ -1,0 +1,14 @@
+--- a/vendor/laravel/octane/bin/frankenphp-worker.php
++++ b/vendor/laravel/octane/bin/frankenphp-worker.php
+@@ -71,6 +71,11 @@
+ 
+ try {
+     $handleRequest = static function () use ($worker, $frankenPhpClient, $debugMode) {
++        // sv-devenv: a worker boots only once, so start an Xdebug session for every request
++        if (function_exists('xdebug_connect_to_client')) {
++            xdebug_connect_to_client();
++        }
++
+         try {
+             [$request, $context] = $frankenPhpClient->marshalRequest(new RequestContext());
+ 
